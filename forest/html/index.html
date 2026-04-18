@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 梦幻森林乐园 - 儿童治愈系学习</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=ZCOOL+KuaiLe&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', 'ZCOOL KuaiLe', cursive;
+            overflow-x: hidden;
+        }
+        
+        .forest-bg {
+            background: linear-gradient(180deg, 
+                rgba(255, 182, 193, 0.7) 0%, 
+                rgba(255, 218, 185, 0.5) 40%, 
+                rgba(255, 228, 196, 0.3) 70%,
+                rgba(255, 228, 196, 0) 100%
+            ), url('img/background.jpg') no-repeat center bottom fixed;
+            background-size: cover;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .cloud {
+            position: absolute;
+            background: white;
+            border-radius: 50px;
+            opacity: 0.8;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .cloud::before, .cloud::after {
+            content: '';
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            50% { transform: translateX(30px) translateY(-10px); }
+        }
+        
+        @keyframes sparkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+        
+        .sparkle {
+            animation: sparkle 2s infinite;
+        }
+        
+        .game-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-15px) rotate(-2deg);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .game-card:active {
+            transform: scale(0.95);
+        }
+        
+        .white-key {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+        
+        .white-key:hover {
+            filter: brightness(1.08);
+        }
+        
+        .white-key.active {
+            background: linear-gradient(180deg, #fef3c7 0%, #fde68a 50%, #fbbf24 100%) !important;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.6), inset 0 -2px 4px rgba(0,0,0,0.1) !important;
+        }
+        
+        .black-key {
+            position: absolute;
+            z-index: 10;
+            background: linear-gradient(180deg, #1f2937 0%, #374151 50%, #111827 100%);
+        }
+        
+        .black-key:hover {
+            filter: brightness(1.2);
+        }
+        
+        .black-key.active {
+            background: linear-gradient(180deg, #7c3aed 0%, #8b5cf6 50%, #6d28d9 100%) !important;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.7), inset 0 -2px 4px rgba(0,0,0,0.2) !important;
+        }
+        
+        .pet-bounce {
+            animation: petBounce 1s infinite ease-in-out;
+        }
+        
+        @keyframes petBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 182, 193, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #fff5f5 0%, #fef3f3 100%);
+            border-radius: 30px;
+            padding: 40px;
+            width: 95%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 4px solid #ffb6c1;
+            box-shadow: 0 20px 60px rgba(255, 182, 193, 0.4);
+            position: relative;
+        }
+        
+        .grass {
+            display: none;
+        }
+        
+        .flower {
+            animation: sway 3s infinite ease-in-out;
+        }
+        
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+        
+        .btn-cute {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 15px 30px;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 154, 158, 0.4);
+        }
+        
+        .btn-cute:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 154, 158, 0.6);
+        }
+        
+        .btn-cute:active {
+            transform: translateY(0);
+        }
+        
+        .chat-bubble {
+            background: white;
+            border-radius: 20px;
+            padding: 15px 20px;
+            margin: 10px 0;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: white transparent transparent;
+        }
+        
+        .music-note {
+            animation: musicFloat 2s infinite ease-in-out;
+        }
+        
+        @keyframes musicFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-15px) rotate(10deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-10px) rotate(-10deg); }
+        }
+        
+        .word-card {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .star {
+            position: absolute;
+            font-size: 24px;
+            animation: twinkle 1.5s infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
+        }
+        
+        .piano-key {
+            transition: all 0.1s;
+        }
+        
+        .piano-key:active {
+            transform: translateY(5px);
+            box-shadow: none !important;
+        }
+        
+        .white-key.active {
+            background: linear-gradient(to bottom, #ff9a9e, #fecfef) !important;
+            transform: translateY(3px);
+            box-shadow: none !important;
+        }
+        
+        .black-key.active {
+            background: linear-gradient(to bottom, #667eea, #764ba2) !important;
+            transform: translateY(3px);
+            box-shadow: none !important;
+        }
+        
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #ffe4e1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #ff9a9e, #fecfef);
+            border-radius: 10px;
+        }
+        
+        .loading-dots span {
+            display: inline-block;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+        
+        .loading-dots span:nth-child(1) {
+            animation-delay: -0.32s;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: -0.16s;
+        }
+        
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body class="forest-bg">
+    <div class="cloud" style="top: 50px; left: 10%; width: 100px; height: 40px;">
+        <div class="absolute" style="top: -15px; left: 20px; width: 30px; height: 30px; background: white; border-radius: 50%;"></div>
+        <div class="absolute" style="top: -25px; left: 40px; width: 40px; height: 40px; background: white; border-radius: 50%;"></div>
+    </div>
+    
+    <div class="cloud" style="top: 80px; right: 20%; width: 120px; height: 45px; animation-delay: -5s;">
+        <div class="absolute" style="top: -20px; left: 30px; width: 35px; height: 35px; background: white; border-radius: 50%;"></div>
+        <div class="absolute" style="top: -30px; left: 50px; width: 45px; height: 45px; background: white; border-radius: 50%;"></div>
+    </div>
+    
+    <div class="star" style="top: 30px; right: 10%;">✨</div>
+    <div class="star" style="top: 60px; left: 5%; animation-delay: -0.5s;">⭐</div>
+    <div class="star" style="top: 100px; right: 30%; animation-delay: -1s;">🌟</div>
+    
+    <header class="text-center pt-12 pb-8 relative z-10">
+        <div class="absolute top-4 right-4 flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+            <div id="ai-status-dot" class="w-3 h-3 rounded-full bg-yellow-400 animate-pulse"></div>
+            <span id="ai-status-text" class="text-sm font-semibold text-gray-600">AI 连接中...</span>
+        </div>
+        <h1 class="text-6xl font-bold text-pink-500 drop-shadow-lg mb-4">
+            <span class="sparkle inline-block">🌸</span>
+            梦幻森林乐园
+            <span class="sparkle inline-block" style="animation-delay: 0.5s;">🦋</span>
+        </h1>
+        <p class="text-2xl text-pink-400 font-semibold">在童话世界里快乐学习 ✨</p>
+    </header>
+    
+    <main class="max-w-5xl mx-auto px-6 pb-20 relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <div class="game-card bg-gradient-to-br from-pink-100 to-pink-200 rounded-3xl p-6 text-center aspect-square flex flex-col items-center justify-center" onclick="openModal('story')">
+                <div class="text-5xl mb-3">📖</div>
+                <h3 class="text-2xl font-bold text-pink-600 mb-2">魔法故事屋</h3>
+                <p class="text-pink-500 text-lg">听小兔子讲温馨故事</p>
+            </div>
+            
+            <div class="game-card bg-gradient-to-br from-green-100 to-green-200 rounded-3xl p-6 text-center aspect-square flex flex-col items-center justify-center" onclick="openModal('word')">
+                <div class="text-5xl mb-3">🍎</div>
+                <h3 class="text-2xl font-bold text-green-600 mb-2">单词果园</h3>
+                <p class="text-green-500 text-lg">在果园里采摘单词</p>
+            </div>
+            
+            <div class="game-card bg-gradient-to-br from-purple-100 to-purple-200 rounded-3xl p-6 text-center aspect-square flex flex-col items-center justify-center" onclick="openModal('music')">
+                <div class="text-5xl mb-3">🎵</div>
+                <h3 class="text-2xl font-bold text-purple-600 mb-2">音乐花园</h3>
+                <p class="text-purple-500 text-lg">和小鸟一起唱歌</p>
+            </div>
+            
+            <div class="game-card bg-gradient-to-br from-yellow-100 to-yellow-200 rounded-3xl p-6 text-center aspect-square flex flex-col items-center justify-center" onclick="openModal('pet')">
+                <div class="text-5xl mb-3">🐰</div>
+                <h3 class="text-2xl font-bold text-yellow-600 mb-2">小兔朋友</h3>
+                <p class="text-yellow-500 text-lg">和小兔聊聊天</p>
+            </div>
+            
+        </div>
+    </main>
+    
+    <div class="grass"></div>
+    
+    <div id="story" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-bold text-pink-500 flex items-center gap-3">
+                    <span>📖</span> 魔法故事屋
+                </h2>
+                <button onclick="closeModal()" class="text-5xl hover:scale-110 transition-transform bg-red-100 hover:bg-red-200 rounded-full w-12 h-12 flex items-center justify-center">❌</button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <select id="story-role" class="p-4 border-3 border-pink-300 rounded-2xl text-lg bg-pink-50">
+                    <option>🐰 小兔子</option>
+                    <option>🐻 小熊</option>
+                    <option>🦊 小狐狸</option>
+                    <option>🐱 小猫咪</option>
+                    <option>🐦 小鸟</option>
+                    <option>🐸 小青蛙</option>
+                    <option>🦋 小蝴蝶</option>
+                    <option>🐿️ 小松鼠</option>
+                </select>
+                <select id="story-place" class="p-4 border-3 border-pink-300 rounded-2xl text-lg bg-pink-50">
+                    <option>🌸 花园</option>
+                    <option>🌲 森林</option>
+                    <option>🌊 小河边</option>
+                    <option>☁️ 云朵上</option>
+                    <option>🏰 城堡</option>
+                    <option>🍬 糖果王国</option>
+                    <option>🌙 月亮上</option>
+                    <option>🏝️ 神秘小岛</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <select id="story-mood" class="p-4 border-3 border-pink-300 rounded-2xl text-lg bg-pink-50">
+                    <option>💖 温馨</option>
+                    <option>😊 开心</option>
+                    <option>🌟 奇妙</option>
+                    <option>💪 勇敢</option>
+                    <option>🎭 有趣</option>
+                    <option>🔮 神秘</option>
+                </select>
+                <select id="story-length" class="p-4 border-3 border-pink-300 rounded-2xl text-lg bg-pink-50">
+                    <option value="short">📏 短篇（100-200字）</option>
+                    <option value="medium">📏 中篇（200-400字）</option>
+                    <option value="long">📏 长篇（400-600字）</option>
+                </select>
+                <select id="story-voice" class="p-4 border-3 border-pink-300 rounded-2xl text-lg bg-pink-50">
+                    <option value="">🎤 加载声音中...</option>
+                </select>
+            </div>
+            
+            <button onclick="generateStory()" class="btn-cute w-full mb-6">
+                ✨ 生成温馨故事 ✨
+            </button>
+            
+            <div id="story-text" class="bg-white rounded-2xl p-6 min-h-[200px] text-lg leading-relaxed text-pink-700 border-2 border-pink-200 relative">
+                <p class="text-center text-pink-400">点击上面的按钮，让小兔子为你讲一个温馨的故事吧~ 🌸</p>
+            </div>
+            <div id="story-ai-badge" class="hidden mt-3 text-center"></div>
+            
+            <div class="grid grid-cols-3 gap-3 mt-4">
+                <button onclick="playStory()" id="btn-play-story" class="btn-cute" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                    ▶️ 播放
+                </button>
+                <button onclick="pauseStory()" id="btn-pause-story" class="btn-cute" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                    ⏸️ 暂停
+                </button>
+                <button onclick="restartStory()" class="btn-cute" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+                    🔄 重新开始
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="word" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-bold text-green-500 flex items-center gap-3">
+                    <span>🍎</span> 单词果园
+                </h2>
+                <button onclick="closeModal()" class="text-5xl hover:scale-110 transition-transform bg-red-100 hover:bg-red-200 rounded-full w-12 h-12 flex items-center justify-center">❌</button>
+            </div>
+            
+            <select id="word-level" class="w-full p-4 border-3 border-green-300 rounded-2xl text-lg bg-green-50 mb-6">
+                <option>🌱 小树苗（2-4岁）</option>
+                <option>🌿 小嫩芽（4-6岁）</option>
+                <option>🌳 小大树（6-8岁）</option>
+            </select>
+            
+            <button onclick="generateWord()" class="btn-cute w-full mb-6" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">
+                🍎 采摘一个单词 🍎
+            </button>
+            
+            <div id="word-card" class="word-card mb-6 cursor-pointer" onclick="speakWord()">
+                <p class="text-green-400 text-xl">点击按钮采摘单词吧~</p>
+            </div>
+            
+            <button onclick="speakWord()" class="btn-cute w-full mb-3" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);">
+                🎧 听发音
+            </button>
+            
+            <button onclick="askAIAboutWord()" class="btn-cute w-full" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                🤖 请AI解释一下
+            </button>
+            
+            <div id="ai-word-explanation" class="mt-4 p-4 bg-green-50 rounded-2xl border-2 border-green-200 hidden">
+                <p class="text-green-700" id="ai-explanation-text"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div id="music" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-bold text-purple-500 flex items-center gap-3">
+                    <span>🎵</span> 音乐花园
+                </h2>
+                <button onclick="closeModal()" class="text-5xl hover:scale-110 transition-transform bg-red-100 hover:bg-red-200 rounded-full w-12 h-12 flex items-center justify-center">❌</button>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-purple-600 mb-3">🎹 迷你小钢琴</h3>
+                <div class="flex justify-center gap-1 p-4 bg-purple-50 rounded-2xl">
+                    <button onclick="playNote('C4')" class="piano-key w-14 h-28 bg-gradient-to-b from-pink-200 to-pink-400 rounded-b-xl hover:from-pink-300 hover:to-pink-500 shadow-lg flex items-end justify-center pb-3 text-pink-700 font-bold text-xl">C<br><span class="text-sm">Do</span></button>
+                    <button onclick="playNote('D4')" class="piano-key w-14 h-28 bg-gradient-to-b from-orange-200 to-orange-400 rounded-b-xl hover:from-orange-300 hover:to-orange-500 shadow-lg flex items-end justify-center pb-3 text-orange-700 font-bold text-xl">D<br><span class="text-sm">Re</span></button>
+                    <button onclick="playNote('E4')" class="piano-key w-14 h-28 bg-gradient-to-b from-yellow-200 to-yellow-400 rounded-b-xl hover:from-yellow-300 hover:to-yellow-500 shadow-lg flex items-end justify-center pb-3 text-yellow-700 font-bold text-xl">E<br><span class="text-sm">Mi</span></button>
+                    <button onclick="playNote('F4')" class="piano-key w-14 h-28 bg-gradient-to-b from-green-200 to-green-400 rounded-b-xl hover:from-green-300 hover:to-green-500 shadow-lg flex items-end justify-center pb-3 text-green-700 font-bold text-xl">F<br><span class="text-sm">Fa</span></button>
+                    <button onclick="playNote('G4')" class="piano-key w-14 h-28 bg-gradient-to-b from-teal-200 to-teal-400 rounded-b-xl hover:from-teal-300 hover:to-teal-500 shadow-lg flex items-end justify-center pb-3 text-teal-700 font-bold text-xl">G<br><span class="text-sm">Sol</span></button>
+                    <button onclick="playNote('A4')" class="piano-key w-14 h-28 bg-gradient-to-b from-blue-200 to-blue-400 rounded-b-xl hover:from-blue-300 hover:to-blue-500 shadow-lg flex items-end justify-center pb-3 text-blue-700 font-bold text-xl">A<br><span class="text-sm">La</span></button>
+                    <button onclick="playNote('B4')" class="piano-key w-14 h-28 bg-gradient-to-b from-purple-200 to-purple-400 rounded-b-xl hover:from-purple-300 hover:to-purple-500 shadow-lg flex items-end justify-center pb-3 text-purple-700 font-bold text-xl">B<br><span class="text-sm">Si</span></button>
+                    <button onclick="playNote('C5')" class="piano-key w-14 h-28 bg-gradient-to-b from-pink-200 to-pink-400 rounded-b-xl hover:from-pink-300 hover:to-pink-500 shadow-lg flex items-end justify-center pb-3 text-pink-700 font-bold text-xl">C<br><span class="text-sm">Do</span></button>
+                </div>
+                <button onclick="openFullPiano()" class="btn-cute w-full mt-4" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+                    🎹 打开完整钢琴模拟器
+                </button>
+            </div>
+            
+            <h3 class="text-xl font-bold text-purple-600 mb-3">🎵 精选歌曲</h3>
+            <div class="grid grid-cols-1 gap-4 mb-6">
+                <div class="bg-gradient-to-r from-indigo-100 to-purple-100 rounded-2xl p-4 border-2 border-purple-200 cursor-pointer hover:shadow-lg transition-shadow" onclick="playRealMusic('xiaoxingxing')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">⭐</span>
+                            <div>
+                                <h4 class="font-bold text-purple-700 text-lg">小星星</h4>
+                                <p class="text-purple-500 text-sm">经典儿歌，温柔治愈</p>
+                            </div>
+                        </div>
+                        <span class="text-3xl">▶️</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-pink-100 to-rose-100 rounded-2xl p-4 border-2 border-pink-200 cursor-pointer hover:shadow-lg transition-shadow" onclick="playRealMusic('liangzhilaohu')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">🐯</span>
+                            <div>
+                                <h4 class="font-bold text-pink-700 text-lg">两只老虎</h4>
+                                <p class="text-pink-500 text-sm">经典儿歌，轻松有趣</p>
+                            </div>
+                        </div>
+                        <span class="text-3xl">▶️</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-cyan-100 to-blue-100 rounded-2xl p-4 border-2 border-cyan-200 cursor-pointer hover:shadow-lg transition-shadow" onclick="playRealMusic('birthday')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-4xl">🎂</span>
+                            <div>
+                                <h4 class="font-bold text-cyan-700 text-lg">生日快乐歌</h4>
+                                <p class="text-cyan-500 text-sm">欢快的节奏，祝你生日快乐</p>
+                            </div>
+                        </div>
+                        <span class="text-3xl">▶️</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="music-info" class="bg-purple-50 rounded-2xl p-6 text-center border-2 border-purple-200 mb-4">
+                <p class="text-purple-400 text-xl">🎵 点击歌曲或钢琴键吧~</p>
+            </div>
+            
+            <div id="music-controls" class="hidden grid grid-cols-3 gap-3 mb-4">
+                <button onclick="restartRealMusic()" class="btn-cute" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">
+                    🔄 重新播放
+                </button>
+                <button onclick="toggleRealMusic()" id="btn-toggle-real" class="btn-cute" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    ⏸️ 暂停
+                </button>
+                <button onclick="stopRealMusic()" class="btn-cute" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    ⏹️ 停止
+                </button>
+            </div>
+            
+            <div id="music-player" class="hidden">
+                <audio id="audio-player"></audio>
+            </div>
+        </div>
+    </div>
+    
+    <div id="pet" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-4xl font-bold text-yellow-600 flex items-center gap-3">
+                    <span class="pet-bounce">🐰</span> 小兔白白
+                </h2>
+                <button onclick="closeModal()" class="text-5xl hover:scale-110 transition-transform bg-red-100 hover:bg-red-200 rounded-full w-12 h-12 flex items-center justify-center">❌</button>
+            </div>
+            
+            <div class="text-center mb-6">
+                <div class="text-9xl pet-bounce inline-block">🐰</div>
+                <p class="text-yellow-500 text-xl mt-2">你好呀！我是小兔白白~ 很高兴认识你！💕</p>
+            </div>
+            
+            <div id="chat-area" class="bg-yellow-50 rounded-2xl p-4 min-h-[250px] max-h-[300px] overflow-y-auto mb-4 border-2 border-yellow-200">
+                <div class="chat-bubble">
+                    <p class="text-yellow-700">嗨！小朋友，今天开心吗？想和我聊什么呢？🥕 要不要我给你讲个笑话？</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3">
+                <input type="text" id="chat-input" placeholder="和小兔说说话吧~" class="flex-1 p-4 border-3 border-yellow-300 rounded-2xl text-lg bg-yellow-50" onkeypress="if(event.key==='Enter') sendChat()">
+                <button onclick="sendChat()" class="btn-cute px-8" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                    💌 发送
+                </button>
+            </div>
+            
+            <div class="flex gap-2 mt-4 flex-wrap">
+                <button onclick="quickChat('你好')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">👋 你好</button>
+                <button onclick="quickChat('讲个笑话')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">😄 讲笑话</button>
+                <button onclick="quickChat('你喜欢吃什么')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">🥕 你喜欢吃什么</button>
+                <button onclick="quickChat('今天天气真好')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">☀️ 聊天气</button>
+                <button onclick="quickChat('我喜欢你')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">💖 我喜欢你</button>
+                <button onclick="quickChat('唱首歌吧')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">🎵 唱歌</button>
+                <button onclick="quickChat('你会做什么')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">🤔 你会做什么</button>
+                <button onclick="quickChat('再见')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">👋 再见</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="full-piano" class="modal">
+        <div class="modal-content" style="max-width: 90vw; max-height: 95vh; width: 90%;">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-3xl font-bold text-purple-600 flex items-center gap-3">
+                    <span class="pet-bounce">🎹</span> 完整钢琴模拟器
+                </h2>
+                <button onclick="closeFullPiano()" class="text-5xl hover:scale-110 transition-transform bg-red-100 hover:bg-red-200 rounded-full w-12 h-12 flex items-center justify-center">❌</button>
+            </div>
+            
+            <div class="mb-4 p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <h3 class="font-bold text-purple-700 mb-2">⌨️ 键盘提示</h3>
+                <div id="keyboard-hint" class="text-sm text-purple-600"></div>
+            </div>
+            
+            <div class="mb-4">
+                <h3 class="text-lg font-bold text-purple-700 mb-2">🎵 儿歌简谱</h3>
+                <div class="flex flex-wrap gap-2 mb-3">
+                    <button onclick="loadSong('xiaoxingxing')" class="bg-yellow-100 hover:bg-yellow-200 px-4 py-2 rounded-full text-yellow-700 transition-colors">⭐ 小星星</button>
+                    <button onclick="loadSong('liangzhilaohu')" class="bg-pink-100 hover:bg-pink-200 px-4 py-2 rounded-full text-pink-700 transition-colors">🐯 两只老虎</button>
+                    <button onclick="loadSong('shengrikuaile')" class="bg-cyan-100 hover:bg-cyan-200 px-4 py-2 rounded-full text-cyan-700 transition-colors">🎂 生日快乐</button>
+                    <button onclick="loadSong('yizhilaoshu')" class="bg-green-100 hover:bg-green-200 px-4 py-2 rounded-full text-green-700 transition-colors">🐭 一只老鼠</button>
+                </div>
+                <div id="song-display" class="p-3 bg-white rounded-xl text-center mb-3"></div>
+            </div>
+            
+            <div class="mb-4 p-3 bg-purple-50 rounded-xl border border-purple-200">
+                <h3 class="font-bold text-purple-700 mb-3">🎮 演奏模式</h3>
+                <div class="flex gap-3">
+                    <button onclick="setMode('demo')" id="btn-demo" class="btn-cute flex-1" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        🎬 示范模式
+                    </button>
+                    <button onclick="setMode('practice')" id="btn-practice" class="btn-cute flex-1" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        🎯 练习模式
+                    </button>
+                </div>
+                <div id="mode-info" class="mt-3 text-sm text-purple-600 text-center">选择一首歌开始吧！</div>
+            </div>
+            
+            <div class="flex justify-center">
+                <div class="overflow-x-auto pb-4">
+                    <div id="piano-container" class="flex relative h-44 bg-purple-100 rounded-lg p-1"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 直接使用本地 Ollama API
+        const API_BASE = 'http://localhost:11434';
+        console.log('API_BASE:', API_BASE);
+        let currentWord = null;
+        let aiAvailable = false;
+        let storyUtterance = null;
+        let isStoryPaused = false;
+        let currentStoryText = '';
+        
+        let pianoMode = null;
+        let currentSong = null;
+        let currentNoteIndex = 0;
+        let demoTimer = null;
+        let isPlayingDemo = false;
+        
+        function removeEmojis(text) {
+            return text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
+                       .replace(/[\u{2600}-\u{26FF}]/gu, '')
+                       .replace(/[\u{2700}-\u{27BF}]/gu, '')
+                       .replace(/[\u{1F600}-\u{1F64F}]/gu, '')
+                       .replace(/[\u{1F680}-\u{1F6FF}]/gu, '')
+                       .replace(/[\u{1F1E0}-\u{1F1FF}]/gu, '')
+                       .trim();
+        }
+        
+        async function checkAIStatus() {
+            const dot = document.getElementById('ai-status-dot');
+            const text = document.getElementById('ai-status-text');
+            
+            try {
+                console.log('正在检查 AI 状态...');
+                const response = await fetch(API_BASE + '/api/tags', {
+                    method: 'GET'
+                });
+                
+                console.log('AI 状态响应:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('AI 状态数据:', data);
+                    
+                    if (data.models && data.models.length > 0) {
+                        aiAvailable = true;
+                        dot.className = 'w-3 h-3 rounded-full bg-green-500 animate-pulse';
+                        text.textContent = 'AI 在线';
+                        text.className = 'text-sm font-semibold text-green-600';
+                    } else {
+                        throw new Error('No models available');
+                    }
+                } else {
+                    throw new Error('Ollama not available');
+                }
+            } catch (error) {
+                console.error('检查 AI 状态出错:', error);
+                aiAvailable = false;
+                dot.className = 'w-3 h-3 rounded-full bg-red-400';
+                text.textContent = 'AI 离线';
+                text.className = 'text-sm font-semibold text-red-500';
+            }
+        }
+        
+        function loadVoices() {
+            const voiceSelect = document.getElementById('story-voice');
+            if (!voiceSelect) return;
+            
+            const voices = window.speechSynthesis.getVoices();
+            const chineseVoices = voices.filter(v => v.lang.includes('zh'));
+            
+            if (chineseVoices.length === 0) {
+                voiceSelect.innerHTML = '<option value="">🎤 未找到中文声音</option>';
+                return;
+            }
+            
+            voiceSelect.innerHTML = '';
+            chineseVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `🎤 ${voice.name}`;
+                voiceSelect.appendChild(option);
+            });
+        }
+        
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        
+        function openModal(id) {
+            stopStory();
+            stopAllMusic();
+            document.getElementById(id).style.display = 'flex';
+        }
+        
+        function closeModal() {
+            stopStory();
+            stopAllMusic();
+            document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+        }
+        
+        async function generateStory() {
+            stopStory();
+            
+            const role = document.getElementById('story-role').value;
+            const place = document.getElementById('story-place').value;
+            const mood = document.getElementById('story-mood').value;
+            const length = document.getElementById('story-length').value;
+            
+            const storyText = document.getElementById('story-text');
+            const aiBadge = document.getElementById('story-ai-badge');
+            storyText.innerHTML = '<p class="text-center text-pink-400">✨ 正在生成故事<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>';
+            aiBadge.classList.add('hidden');
+            
+            try {
+                const response = await fetch(API_BASE + '/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "qwen2.5:7b",
+                        prompt: `请为小朋友写一个儿童故事：
+- 主角：${role}
+- 地点：${place}
+- 情感基调：${mood}
+- 长度：${length === 'short' ? '100-200 字' : length === 'medium' ? '200-400 字' : '400-600 字'}
+
+要求：
+1. 语言简单温馨，适合儿童阅读
+2. 内容积极向上，传递友爱、勇敢等正能量
+3. 不要出现恐怖、暴力、死亡等负面内容
+4. 使用拟人化的表达方式
+5. 故事要有完整的开头、经过和结尾
+
+请直接输出故事内容，不需要标题。`,
+                        stream: false
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.response) {
+                    storyText.innerHTML = `<p>${data.response}</p>`;
+                    aiBadge.classList.remove('hidden');
+                    aiBadge.innerHTML = `<span class="inline-flex items-center gap-2 bg-gradient-to-r from-green-400 to-blue-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                        🤖 AI 生成
+                    </span>`;
+                } else {
+                    throw new Error('生成失败');
+                }
+            } catch (error) {
+                storyText.innerHTML = '<p class="text-center text-red-400">😢 连接失败，请稍后重试！</p>';
+                console.error('Error:', error);
+            }
+        }
+        
+        function playStory() {
+            const text = document.getElementById('story-text').innerText;
+            if (!text || text.includes('点击') || text.includes('生成') || text.includes('连接')) {
+                return;
+            }
+            
+            currentStoryText = removeEmojis(text);
+            
+            if (isStoryPaused && storyUtterance) {
+                window.speechSynthesis.resume();
+                isStoryPaused = false;
+                return;
+            }
+            
+            stopStory();
+            
+            storyUtterance = new SpeechSynthesisUtterance(currentStoryText);
+            storyUtterance.lang = 'zh-CN';
+            storyUtterance.rate = 1.0;   // 语速：0.5-2
+            storyUtterance.pitch = 1.2;   // 音调：0-2
+            storyUtterance.volume = 1;    // 音量：0-1
+            
+            // 使用选择的声音
+            const voiceSelect = document.getElementById('story-voice');
+            const selectedIndex = voiceSelect ? voiceSelect.value : '';
+            const voices = window.speechSynthesis.getVoices();
+            const chineseVoices = voices.filter(v => v.lang.includes('zh'));
+            
+            if (chineseVoices.length > 0) {
+                const voiceIndex = selectedIndex !== '' ? parseInt(selectedIndex) : 0;
+                if (chineseVoices[voiceIndex]) {
+                    storyUtterance.voice = chineseVoices[voiceIndex];
+                } else {
+                    storyUtterance.voice = chineseVoices[0];
+                }
+            }
+            
+            storyUtterance.onend = () => {
+                isStoryPaused = false;
+            };
+            
+            window.speechSynthesis.speak(storyUtterance);
+        }
+        
+        function pauseStory() {
+            if (storyUtterance && !isStoryPaused) {
+                window.speechSynthesis.pause();
+                isStoryPaused = true;
+            }
+        }
+        
+        function restartStory() {
+            if (currentStoryText) {
+                stopStory();
+                playStory();
+            }
+        }
+        
+        function stopStory() {
+            window.speechSynthesis.cancel();
+            storyUtterance = null;
+            isStoryPaused = false;
+        }
+        
+        async function generateWord() {
+            const level = document.getElementById('word-level').value;
+            const wordCard = document.getElementById('word-card');
+            wordCard.innerHTML = '<p class="text-green-400 text-xl">🍎 正在采摘单词...</p>';
+            
+            const wordLevels = {
+                '🌱 小树苗（2-4 岁）': ['apple', 'cat', 'dog', 'sun', 'book'],
+                '🌿 小嫩芽（4-6 岁）': ['happy', 'friend', 'school', 'flower', 'music'],
+                '🌳 小大树（6-8 岁）': ['beautiful', 'adventure', 'discover', 'wonderful', 'imagine']
+            };
+            
+            const words = wordLevels[level] || wordLevels['🌱 小树苗（2-4 岁）'];
+            const randomWord = words[Math.floor(Math.random() * words.length)];
+            
+            try {
+                const response = await fetch(API_BASE + '/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "qwen2.5:7b",
+                        prompt: `请为小朋友解释英文单词"${randomWord}"：
+1. 给出中文意思
+2. 造一个简单的英文例句
+3. 用有趣的方式解释这个单词
+4. 适合${level}的水平
+
+请按以下 JSON 格式返回：
+{
+  "word": "${randomWord}",
+  "chinese": "中文意思",
+  "sentence": "英文例句",
+  "fun": "有趣的解释"
+}`,
+                        stream: false
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.response) {
+                    const match = data.response.match(/\{[\s\S]*\}/);
+                    if (match) {
+                        currentWord = JSON.parse(match[0]);
+                    } else {
+                        currentWord = {
+                            word: randomWord,
+                            chinese: '未知',
+                            sentence: 'Loading...',
+                            fun: data.response
+                        };
+                    }
+                    wordCard.innerHTML = `
+                        <div class="text-7xl mb-4">${currentWord.emoji || '🍎'}</div>
+                        <div class="text-5xl font-bold text-green-700 mb-2">${currentWord.word}</div>
+                        <div class="text-3xl text-green-600 mb-3">${currentWord.chinese}</div>
+                        <p class="text-green-500 text-sm">${currentWord.sentence}</p>
+                        <p class="text-green-400 text-sm mt-2">${currentWord.fun}</p>
+                    `;
+                    document.getElementById('ai-word-explanation').classList.add('hidden');
+                } else {
+                    throw new Error('生成失败');
+                }
+            } catch (error) {
+                wordCard.innerHTML = '<p class="text-red-400 text-xl">😢 获取单词失败，请稍后重试！</p>';
+                console.error('Error:', error);
+            }
+        }
+        
+        function speakWord() {
+            if (currentWord) {
+                window.speechSynthesis.cancel();
+                
+                setTimeout(() => {
+                    const englishUtterance = new SpeechSynthesisUtterance(currentWord.word);
+                    englishUtterance.lang = 'en-US';
+                    englishUtterance.rate = 0.9;
+                    
+                    englishUtterance.onend = () => {
+                        setTimeout(() => {
+                            const chineseUtterance = new SpeechSynthesisUtterance(currentWord.chinese);
+                            chineseUtterance.lang = 'zh-CN';
+                            chineseUtterance.rate = 0.9;
+                            
+                            const voiceSelect = document.getElementById('story-voice');
+                            const selectedIndex = voiceSelect ? voiceSelect.value : '';
+                            const voices = window.speechSynthesis.getVoices();
+                            const chineseVoices = voices.filter(v => v.lang.includes('zh'));
+                            
+                            if (chineseVoices.length > 0) {
+                                const voiceIndex = selectedIndex !== '' ? parseInt(selectedIndex) : 0;
+                                if (chineseVoices[voiceIndex]) {
+                                    chineseUtterance.voice = chineseVoices[voiceIndex];
+                                } else {
+                                    chineseUtterance.voice = chineseVoices[0];
+                                }
+                            }
+                            
+                            window.speechSynthesis.speak(chineseUtterance);
+                        }, 50);
+                    };
+                    
+                    window.speechSynthesis.speak(englishUtterance);
+                }, 500);
+            }
+        }
+        
+        async function askAIAboutWord() {
+            if (!currentWord) {
+                alert('请先采摘一个单词吧！');
+                return;
+            }
+            
+            const explanationDiv = document.getElementById('ai-word-explanation');
+            const explanationText = document.getElementById('ai-explanation-text');
+            
+            explanationDiv.classList.remove('hidden');
+            explanationText.textContent = '🤖 正在思考...';
+            
+            try {
+                const response = await fetch(API_BASE + '/api/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "qwen2.5:7b",
+                        prompt: `你是儿童英语启蒙老师。请用生动有趣的方式给小朋友解释单词"${currentWord.word}"（${currentWord.chinese}）。
+
+要求：
+1. 语言简单易懂，适合儿童
+2. 用生活中的例子说明
+3. 可以联想记忆
+4. 鼓励小朋友使用这个单词
+5. 回答长度：3-5 句话
+
+请直接输出解释内容。`,
+                        stream: false
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.response) {
+                    explanationText.textContent = data.response;
+                } else {
+                    throw new Error('解释失败');
+                }
+            } catch (error) {
+                explanationText.textContent = '😢 连接失败，请稍后重试！';
+                console.error('Error:', error);
+            }
+        }
+        
+        let audioContext = null;
+        
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function playNote(note) {
+            initAudioContext();
+            
+            const frequencies = {
+                'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23,
+                'G4': 392.00, 'A4': 440.00, 'B4': 493.88, 'C5': 523.25
+            };
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequencies[note];
+            
+            gainNode.gain.setValueAtTime(0.6, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 1);
+            
+            const musicInfo = document.getElementById('music-info');
+            const noteNames = {
+                'C4': 'Do', 'D4': 'Re', 'E4': 'Mi', 'F4': 'Fa',
+                'G4': 'Sol', 'A4': 'La', 'B4': 'Si', 'C5': '高音Do'
+            };
+            musicInfo.innerHTML = `<p class="text-4xl text-purple-600">🎵 ${noteNames[note]}！太棒了！</p>`;
+        }
+        
+        let currentMusicPlaying = null;
+        let currentMusicName = null;
+        
+        function playRealMusic(musicName) {
+            const musicInfo = document.getElementById('music-info');
+            const audioPlayer = document.getElementById('audio-player');
+            const musicControls = document.getElementById('music-controls');
+            const toggleBtn = document.getElementById('btn-toggle-real');
+            
+            const songNames = {
+                xiaoxingxing: { name: '小星星', emoji: '⭐' },
+                liangzhilaohu: { name: '两只老虎', emoji: '🐯' },
+                birthday: { name: '生日快乐歌', emoji: '🎂' }
+            };
+            
+            const song = songNames[musicName];
+            currentMusicPlaying = song;
+            currentMusicName = musicName;
+            
+            musicInfo.innerHTML = `<p class="text-4xl mb-2">${song.emoji} 正在播放：${song.name}</p><p class="text-purple-400">请欣赏~</p>`;
+            musicControls.classList.remove('hidden');
+            toggleBtn.innerHTML = '⏸️ 暂停';
+            
+            audioPlayer.src = `music/${musicName}.mp3`;
+            audioPlayer.play();
+            
+            audioPlayer.onended = () => {
+                musicInfo.innerHTML = `<p class="text-4xl text-purple-600">${song.emoji} 播放完毕！再来一首吗？</p>`;
+                toggleBtn.innerHTML = '⏸️ 暂停';
+            };
+        }
+        
+        function toggleRealMusic() {
+            const audioPlayer = document.getElementById('audio-player');
+            const toggleBtn = document.getElementById('btn-toggle-real');
+            const musicInfo = document.getElementById('music-info');
+            
+            if (audioPlayer.paused) {
+                audioPlayer.play();
+                toggleBtn.innerHTML = '⏸️ 暂停';
+                if (currentMusicPlaying) {
+                    musicInfo.innerHTML = `<p class="text-4xl mb-2">${currentMusicPlaying.emoji} 正在播放：${currentMusicPlaying.name}</p><p class="text-purple-400">请欣赏~</p>`;
+                }
+            } else {
+                audioPlayer.pause();
+                toggleBtn.innerHTML = '▶️ 继续';
+                if (currentMusicPlaying) {
+                    musicInfo.innerHTML = `<p class="text-4xl mb-2">${currentMusicPlaying.emoji} 已暂停：${currentMusicPlaying.name}</p>`;
+                }
+            }
+        }
+        
+        function restartRealMusic() {
+            if (currentMusicName) {
+                playRealMusic(currentMusicName);
+            }
+        }
+        
+        function stopRealMusic() {
+            const audioPlayer = document.getElementById('audio-player');
+            const musicInfo = document.getElementById('music-info');
+            const musicControls = document.getElementById('music-controls');
+            
+            audioPlayer.pause();
+            audioPlayer.currentTime = 0;
+            musicControls.classList.add('hidden');
+            musicInfo.innerHTML = `<p class="text-purple-400 text-xl">🎵 点击歌曲或钢琴键吧~</p>`;
+            currentMusicPlaying = null;
+            currentMusicName = null;
+        }
+        
+        function stopAllMusic() {
+            stopRealMusic();
+        }
+        
+        // 聊天记录数组（用于上下文对话）
+        let chatHistory = [];
+        
+        async function sendChat() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (!message) return;
+            
+            addChatMessage(message, 'user');
+            input.value = '';
+            
+            const chatArea = document.getElementById('chat-area');
+            const loadingBubble = document.createElement('div');
+            loadingBubble.className = 'chat-bubble';
+            loadingBubble.innerHTML = '<p class="text-yellow-700"><strong>🐰 小兔白白：</strong>正在思考<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span></p>';
+            chatArea.appendChild(loadingBubble);
+            chatArea.scrollTop = chatArea.scrollHeight;
+            
+            try {
+                // 将用户消息添加到历史记录
+                chatHistory.push({ role: "user", content: message });
+                
+                // 限制聊天记录长度（只保留最近 10 条，避免 token 过多）
+                if (chatHistory.length > 10) {
+                    chatHistory = chatHistory.slice(-10);
+                }
+                
+                const response = await fetch(API_BASE + '/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "qwen2.5:7b",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "你是儿童教育助手'小兔白白'。请用以下方式和小朋友交流：1. 语言风格：简单可爱、通俗易懂、生动有趣，使用拟人化表达；2. 用'你好呀''嗨'等亲切问候，多用感叹号和表情符号（🐰✨🌸）；3. 内容积极向上，传递友爱、勇敢等正能量；4. 不提及危险、恐怖等负面内容；5. 回答长度：每次 3-5 句话，简短精炼，适合儿童注意力。"
+                            },
+                            ...chatHistory  // 包含聊天记录
+                        ],
+                        stream: false
+                    })
+                });
+                
+                const data = await response.json();
+                chatArea.removeChild(loadingBubble);
+                
+                if (data.message && data.message.content) {
+                    const aiReply = data.message.content;
+                    // 将 AI 回复添加到历史记录
+                    chatHistory.push({ role: "assistant", content: aiReply });
+                    addChatMessage(aiReply, 'rabbit', true);
+                } else {
+                    throw new Error('聊天失败');
+                }
+            } catch (error) {
+                chatArea.removeChild(loadingBubble);
+                addChatMessage('😢 连接失败，请稍后重试！', 'rabbit', false);
+                console.error('Error:', error);
+            }
+        }
+        
+        function quickChat(msg) {
+            document.getElementById('chat-input').value = msg;
+            sendChat();
+        }
+        
+        function addChatMessage(text, type, useAi = false) {
+            const chatArea = document.getElementById('chat-area');
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            
+            if (type === 'user') {
+                bubble.style.background = 'linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%)';
+                bubble.innerHTML = `<p class="text-yellow-800"><strong>你：</strong>${text}</p>`;
+            } else {
+                let aiBadge = '';
+                if (useAi) {
+                    aiBadge = `<span class="inline-flex items-center gap-1 bg-gradient-to-r from-green-400 to-blue-500 text-white text-xs px-2 py-1 rounded-full ml-2">
+                        🤖 AI
+                    </span>`;
+                } else {
+                    aiBadge = `<span class="inline-flex items-center gap-1 bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full ml-2">
+                        📝
+                    </span>`;
+                }
+                bubble.innerHTML = `<p class="text-yellow-700"><strong>🐰 小兔白白：</strong>${text}${aiBadge}</p>`;
+            }
+            
+            chatArea.appendChild(bubble);
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+        
+        function speak(text) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            window.speechSynthesis.speak(utterance);
+        }
+        
+        const songs = {
+            xiaoxingxing: {
+                name: '小星星',
+                notes: ['C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4',
+                        'G4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'G4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4',
+                        'C4', 'C4', 'G4', 'G4', 'A4', 'A4', 'G4', 'F4', 'F4', 'E4', 'E4', 'D4', 'D4', 'C4'],
+                jianpu: '1 1 5 5 6 6 5 | 4 4 3 3 2 2 1 | 5 5 4 4 3 3 2 | 5 5 4 4 3 3 2 | 1 1 5 5 6 6 5 | 4 4 3 3 2 2 1'
+            },
+            liangzhilaohu: {
+                name: '两只老虎',
+                notes: ['C4', 'D4', 'E4', 'C4', 'C4', 'D4', 'E4', 'C4', 'E4', 'F4', 'G4', 'E4', 'F4', 'G4',
+                        'G4', 'A4', 'G4', 'F4', 'E4', 'C4', 'G4', 'A4', 'G4', 'F4', 'E4', 'C4', 'C4', 'G3', 'C4', 'C4', 'G3', 'C4'],
+                jianpu: '1 2 3 1 | 1 2 3 1 | 3 4 5 | 3 4 5 | 5 6 5 4 3 1 | 5 6 5 4 3 1 | 1 5 1 | 1 5 1'
+            },
+            shengrikuaile: {
+                name: '生日快乐',
+                notes: ['G4', 'G4', 'A4', 'G4', 'C5', 'B4', 'G4', 'G4', 'A4', 'G4', 'D5', 'C5',
+                        'G4', 'G4', 'G5', 'E5', 'C5', 'B4', 'A4', 'F5', 'F5', 'E5', 'C5', 'D5', 'C5'],
+                jianpu: '5 5 6 5 1\' 7 | 5 5 6 5 2\' 1\' | 5 5 5\' 3\' 1\' 7 6 | 4\' 4\' 3\' 1\' 2\' 1\''
+            },
+            yizhilaoshu: {
+                name: '一只老鼠',
+                notes: ['C4', 'D4', 'E4', 'C4', 'E4', 'C4', 'E4', 'D4', 'E4', 'F4', 'G4', 'F4', 'E4', 'F4', 'G4'],
+                jianpu: '1 2 3 1 | 3 1 | 3 2 3 4 5 | 4 3 4 5'
+            }
+        };
+        
+        const keyboardMap = {
+            'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4', 'f': 'F4',
+            't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4', 'u': 'A#4', 'j': 'B4',
+            'k': 'C5', 'o': 'C#5', 'l': 'D5', 'p': 'D#5', ';': 'E5', '\'': 'F5',
+            'z': 'C3', 'x': 'D3', 'c': 'E3', 'v': 'F3', 'b': 'G3', 'n': 'A3', 'm': 'B3'
+        };
+        
+        const noteNames = {
+            'C': 'Do', 'D': 'Re', 'E': 'Mi', 'F': 'Fa',
+            'G': 'Sol', 'A': 'La', 'B': 'Si'
+        };
+        
+        let pianoAudioContext = null;
+        let activeOscillators = {};
+        
+        function initPianoAudio() {
+            if (!pianoAudioContext) {
+                pianoAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+        
+        function getFrequency(note) {
+            const noteMap = { 'C': 0, 'C#': 1, 'D': 2, 'D#': 3, 'E': 4, 'F': 5, 'F#': 6, 'G': 7, 'G#': 8, 'A': 9, 'A#': 10, 'B': 11 };
+            const match = note.match(/([A-G]#?)(\d)/);
+            if (!match) return 440;
+            const noteName = match[1];
+            const octave = parseInt(match[2]);
+            const semitone = noteMap[noteName] + (octave - 4) * 12;
+            return 440 * Math.pow(2, (semitone - 9) / 12);
+        }
+        
+        function playFullPianoNote(note) {
+            initPianoAudio();
+            if (activeOscillators[note]) return;
+            
+            const frequency = getFrequency(note);
+            const oscillator = pianoAudioContext.createOscillator();
+            const gainNode = pianoAudioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(pianoAudioContext.destination);
+            
+            oscillator.type = 'triangle';
+            oscillator.frequency.value = frequency;
+            
+            gainNode.gain.setValueAtTime(0.5, pianoAudioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, pianoAudioContext.currentTime + 1.5);
+            
+            oscillator.start(pianoAudioContext.currentTime);
+            activeOscillators[note] = { oscillator, gainNode };
+            
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.add('active');
+                keyElement.style.transform = 'translateY(4px) scale(0.98)';
+                keyElement.style.boxShadow = '0 2px 4px rgba(0,0,0,0.2)';
+            }
+            
+            setTimeout(() => {
+                stopFullPianoNote(note);
+            }, 1500);
+        }
+        
+        function stopFullPianoNote(note) {
+            if (activeOscillators[note]) {
+                const { oscillator, gainNode } = activeOscillators[note];
+                gainNode.gain.exponentialRampToValueAtTime(0.01, pianoAudioContext.currentTime + 0.1);
+                setTimeout(() => {
+                    oscillator.stop();
+                }, 100);
+                delete activeOscillators[note];
+            }
+            
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.remove('active');
+                keyElement.style.transform = '';
+                keyElement.style.boxShadow = '';
+            }
+        }
+        
+        function generatePiano() {
+            const container = document.getElementById('piano-container');
+            container.innerHTML = '';
+            
+            const startOctave = 3;
+            const endOctave = 5;
+            const whiteKeys = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
+            const blackKeys = ['C#', 'D#', null, 'F#', 'G#', 'A#', null];
+            
+            const whiteColors = [
+                'from-pink-100 to-rose-50',
+                'from-yellow-100 to-amber-50',
+                'from-cyan-100 to-sky-50',
+                'from-purple-100 to-violet-50',
+                'from-green-100 to-emerald-50',
+                'from-orange-100 to-red-50',
+                'from-blue-100 to-indigo-50'
+            ];
+            
+            let whiteKeyIndex = 0;
+            
+            for (let octave = startOctave; octave <= endOctave; octave++) {
+                for (let i = 0; i < 7; i++) {
+                    const whiteNote = whiteKeys[i] + octave;
+                    const blackNote = blackKeys[i] ? blackKeys[i] + octave : null;
+                    const colorClass = whiteColors[i % whiteColors.length];
+                    
+                    const whiteKey = document.createElement('button');
+                    whiteKey.className = `white-key relative flex flex-col items-center justify-end pb-3 bg-gradient-to-b ${colorClass} hover:brightness-110 border-2 border-gray-200 rounded-b-xl shadow-xl transition-all duration-150 active:translate-y-1`;
+                    whiteKey.style.width = '50px';
+                    whiteKey.style.height = '200px';
+                    whiteKey.style.marginRight = '3px';
+                    whiteKey.dataset.note = whiteNote;
+                    
+                    const noteLetter = whiteKeys[i];
+                    const solfege = noteNames[noteLetter];
+                    const keyHint = Object.keys(keyboardMap).find(k => keyboardMap[k] === whiteNote) || '';
+                    
+                    whiteKey.innerHTML = `
+                        <div class="flex flex-col items-center">
+                            <span class="text-lg font-bold text-gray-800 mb-1">${solfege}</span>
+                            <span class="text-sm font-semibold text-gray-600">${noteLetter}${octave}</span>
+                            ${keyHint ? `<span class="mt-2 px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full shadow-lg">${keyHint.toUpperCase()}</span>` : ''}
+                        </div>
+                    `;
+                    
+                    whiteKey.onmousedown = () => { playFullPianoNote(whiteNote); checkPracticeNote(whiteNote); };
+                    whiteKey.onmouseup = () => stopFullPianoNote(whiteNote);
+                    whiteKey.onmouseleave = () => stopFullPianoNote(whiteNote);
+                    whiteKey.ontouchstart = (e) => { e.preventDefault(); playFullPianoNote(whiteNote); checkPracticeNote(whiteNote); };
+                    whiteKey.ontouchend = (e) => { e.preventDefault(); stopFullPianoNote(whiteNote); };
+                    
+                    container.appendChild(whiteKey);
+                    
+                    if (blackNote) {
+                        const blackKey = document.createElement('button');
+                        blackKey.className = 'black-key absolute z-20 bg-gradient-to-b from-gray-900 to-gray-700 hover:from-gray-800 hover:to-gray-600 rounded-b-lg shadow-2xl transition-all duration-150 flex flex-col items-center justify-end pb-3 border border-gray-600 active:translate-y-1';
+                        blackKey.style.width = '30px';
+                        blackKey.style.height = '120px';
+                        blackKey.style.left = `${whiteKeyIndex * 53 + 35}px`;
+                        blackKey.dataset.note = blackNote;
+                        
+                        const blackKeyHint = Object.keys(keyboardMap).find(k => keyboardMap[k] === blackNote) || '';
+                        blackKey.innerHTML = blackKeyHint ? `<span class="px-2 py-1 bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-xs font-bold rounded-full shadow-lg">${blackKeyHint.toUpperCase()}</span>` : '';
+                        
+                        blackKey.onmousedown = () => { playFullPianoNote(blackNote); checkPracticeNote(blackNote); };
+                        blackKey.onmouseup = () => stopFullPianoNote(blackNote);
+                        blackKey.onmouseleave = () => stopFullPianoNote(blackNote);
+                        blackKey.ontouchstart = (e) => { e.preventDefault(); playFullPianoNote(blackNote); checkPracticeNote(blackNote); };
+                        blackKey.ontouchend = (e) => { e.preventDefault(); stopFullPianoNote(blackNote); };
+                        
+                        container.appendChild(blackKey);
+                    }
+                    
+                    whiteKeyIndex++;
+                }
+            }
+            
+            const keyboardHint = document.getElementById('keyboard-hint');
+            keyboardHint.innerHTML = `
+                <div class="flex flex-wrap gap-3 justify-center items-center">
+                    <div class="flex gap-2">
+                        <span class="bg-gradient-to-r from-purple-100 to-pink-100 px-3 py-2 rounded-lg border-2 border-purple-200 font-semibold text-purple-700">A=Do</span>
+                        <span class="bg-gradient-to-r from-yellow-100 to-amber-100 px-3 py-2 rounded-lg border-2 border-yellow-200 font-semibold text-yellow-700">S=Re</span>
+                        <span class="bg-gradient-to-r from-cyan-100 to-sky-100 px-3 py-2 rounded-lg border-2 border-cyan-200 font-semibold text-cyan-700">D=Mi</span>
+                        <span class="bg-gradient-to-r from-purple-100 to-violet-100 px-3 py-2 rounded-lg border-2 border-purple-200 font-semibold text-purple-700">F=Fa</span>
+                        <span class="bg-gradient-to-r from-green-100 to-emerald-100 px-3 py-2 rounded-lg border-2 border-green-200 font-semibold text-green-700">G=Sol</span>
+                        <span class="bg-gradient-to-r from-orange-100 to-red-100 px-3 py-2 rounded-lg border-2 border-orange-200 font-semibold text-orange-700">H=La</span>
+                        <span class="bg-gradient-to-r from-blue-100 to-indigo-100 px-3 py-2 rounded-lg border-2 border-blue-200 font-semibold text-blue-700">J=Si</span>
+                        <span class="bg-gradient-to-r from-pink-100 to-rose-100 px-3 py-2 rounded-lg border-2 border-pink-200 font-semibold text-pink-700">K=高音Do</span>
+                    </div>
+                    <span class="bg-gradient-to-r from-gray-700 to-gray-900 px-4 py-2 rounded-lg text-white font-semibold">🎹 黑键: W E T Y U O P ; Z X C V B N M</span>
+                </div>
+            `;
+        }
+        
+        function setMode(mode) {
+            stopDemo();
+            clearAllHighlights();
+            pianoMode = mode;
+            currentNoteIndex = 0;
+            
+            const btnDemo = document.getElementById('btn-demo');
+            const btnPractice = document.getElementById('btn-practice');
+            const modeInfo = document.getElementById('mode-info');
+            
+            if (mode === 'demo') {
+                btnDemo.style.opacity = '1';
+                btnPractice.style.opacity = '0.6';
+                if (currentSong) {
+                    modeInfo.textContent = '点击歌曲开始示范演奏！';
+                } else {
+                    modeInfo.textContent = '先选择一首歌！';
+                }
+            } else {
+                btnDemo.style.opacity = '0.6';
+                btnPractice.style.opacity = '1';
+                if (currentSong) {
+                    modeInfo.textContent = '跟着提示按键练习吧！';
+                    highlightCurrentNote();
+                } else {
+                    modeInfo.textContent = '先选择一首歌！';
+                }
+            }
+        }
+        
+        function loadSong(songId) {
+            stopDemo();
+            clearAllHighlights();
+            
+            const song = songs[songId];
+            if (!song) return;
+            
+            currentSong = song;
+            currentNoteIndex = 0;
+            
+            const songDisplay = document.getElementById('song-display');
+            songDisplay.innerHTML = `
+                <h4 class="font-bold text-purple-700 text-lg mb-2">🎵 ${song.name}</h4>
+                <p class="text-purple-600 text-xl">${song.jianpu}</p>
+                <button onclick="startSong('${songId}')" class="btn-cute mt-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    ▶️ 开始
+                </button>
+            `;
+            
+            const modeInfo = document.getElementById('mode-info');
+            if (pianoMode === 'practice') {
+                modeInfo.textContent = '跟着提示按键练习吧！';
+                highlightCurrentNote();
+            } else if (pianoMode === 'demo') {
+                modeInfo.textContent = '点击"开始"按钮看示范！';
+            } else {
+                modeInfo.textContent = '选择一个模式开始吧！';
+            }
+        }
+        
+        function startSong(songId) {
+            stopDemo();
+            clearAllHighlights();
+            
+            const song = songs[songId];
+            if (!song) return;
+            
+            currentSong = song;
+            currentNoteIndex = 0;
+            
+            if (pianoMode === 'demo') {
+                playDemo();
+            } else if (pianoMode === 'practice') {
+                highlightCurrentNote();
+            }
+        }
+        
+        let demoSkipNext = false;
+        
+        async function playDemo() {
+            if (!currentSong) return;
+            
+            isPlayingDemo = true;
+            currentNoteIndex = 0;
+            const modeInfo = document.getElementById('mode-info');
+            modeInfo.textContent = '🎬 正在示范演奏... 按下正确键可以快速跳过！';
+            
+            for (let i = 0; i < currentSong.notes.length; i++) {
+                if (!isPlayingDemo) break;
+                
+                currentNoteIndex = i;
+                const note = currentSong.notes[i];
+                highlightNote(note);
+                playFullPianoNote(note);
+                
+                demoSkipNext = false;
+                const startTime = Date.now();
+                
+                await new Promise(resolve => {
+                    demoTimer = setTimeout(resolve, 300);
+                    
+                    const checkSkip = () => {
+                        if (demoSkipNext || Date.now() - startTime >= 300) {
+                            resolve();
+                        } else {
+                            requestAnimationFrame(checkSkip);
+                        }
+                    };
+                    requestAnimationFrame(checkSkip);
+                });
+                
+                stopFullPianoNote(note);
+                clearHighlight(note);
+            }
+            
+            isPlayingDemo = false;
+            modeInfo.textContent = '✅ 示范完毕！';
+        }
+        
+        function stopDemo() {
+            isPlayingDemo = false;
+            if (demoTimer) {
+                clearTimeout(demoTimer);
+                demoTimer = null;
+            }
+            clearAllHighlights();
+        }
+        
+        function highlightNote(note) {
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.add('highlight');
+                if (keyElement.classList.contains('white-key')) {
+                    keyElement.style.background = 'linear-gradient(to bottom, #ffe066, #ffcc00)';
+                } else {
+                    keyElement.style.background = 'linear-gradient(to bottom, #ff9900, #cc7700)';
+                }
+            }
+        }
+        
+        function clearHighlight(note) {
+            const keyElement = document.querySelector(`[data-note="${note}"]`);
+            if (keyElement) {
+                keyElement.classList.remove('highlight');
+                if (keyElement.classList.contains('white-key')) {
+                    keyElement.style.background = '';
+                } else {
+                    keyElement.style.background = '';
+                }
+            }
+        }
+        
+        function clearAllHighlights() {
+            document.querySelectorAll('.white-key, .black-key').forEach(key => {
+                key.classList.remove('highlight');
+                if (key.classList.contains('white-key')) {
+                    key.style.background = '';
+                } else {
+                    key.style.background = '';
+                }
+            });
+        }
+        
+        function highlightCurrentNote() {
+            if (!currentSong || pianoMode !== 'practice') return;
+            if (currentNoteIndex >= currentSong.notes.length) {
+                const modeInfo = document.getElementById('mode-info');
+                modeInfo.textContent = '🎉 太棒了！练习完成！';
+                return;
+            }
+            const note = currentSong.notes[currentNoteIndex];
+            highlightNote(note);
+        }
+        
+        function checkPracticeNote(note) {
+            if (!currentSong) return;
+            
+            if (pianoMode === 'demo' && isPlayingDemo) {
+                if (currentNoteIndex < currentSong.notes.length) {
+                    const targetNote = currentSong.notes[currentNoteIndex];
+                    if (note === targetNote) {
+                        demoSkipNext = true;
+                        if (demoTimer) {
+                            clearTimeout(demoTimer);
+                            demoTimer = null;
+                        }
+                    }
+                }
+            } else if (pianoMode === 'practice') {
+                if (currentNoteIndex >= currentSong.notes.length) return;
+                
+                const targetNote = currentSong.notes[currentNoteIndex];
+                
+                if (note === targetNote) {
+                    clearHighlight(targetNote);
+                    currentNoteIndex++;
+                    highlightCurrentNote();
+                }
+            }
+        }
+        
+        function openFullPiano() {
+            document.getElementById('full-piano').style.display = 'flex';
+            generatePiano();
+            document.addEventListener('keydown', handlePianoKeyDown);
+            document.addEventListener('keyup', handlePianoKeyUp);
+            pianoMode = null;
+            currentSong = null;
+            currentNoteIndex = 0;
+            const modeInfo = document.getElementById('mode-info');
+            modeInfo.textContent = '选择一首歌和模式开始吧！';
+        }
+        
+        function closeFullPiano() {
+            stopDemo();
+            stopAllMusic();
+            document.getElementById('full-piano').style.display = 'none';
+            document.removeEventListener('keydown', handlePianoKeyDown);
+            document.removeEventListener('keyup', handlePianoKeyUp);
+            Object.keys(activeOscillators).forEach(note => stopFullPianoNote(note));
+        }
+        
+        function handlePianoKeyDown(e) {
+            const key = e.key.toLowerCase();
+            const note = keyboardMap[key];
+            if (note && !e.repeat) {
+                e.preventDefault();
+                playFullPianoNote(note);
+                checkPracticeNote(note);
+            }
+        }
+        
+        function handlePianoKeyUp(e) {
+            const key = e.key.toLowerCase();
+            const note = keyboardMap[key];
+            if (note) {
+                e.preventDefault();
+                stopFullPianoNote(note);
+            }
+        }
+        
+        window.addEventListener('load', () => {
+            checkAIStatus();
+            loadVoices();
+            setInterval(checkAIStatus, 30000);
+        });
+    </script>
+</body>
+</html>
