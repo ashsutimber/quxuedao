@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>探索号潜水艇</title>
+    <style>
+        /* ==================== CSS变量定义 ==================== */
+        :root {
+            --primary-color: #87CEEB; /* 主色调：浅蓝色 */
+            --glass-bg: rgba(255, 255, 255, 0.3); /* 毛玻璃背景色 */
+            --text-color: #ffffff; /* 文字颜色：白色 */
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 阴影效果 */
+        }
+
+        /* ==================== 全局样式重置 ==================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        /* ==================== 页面主体样式 ==================== */
+        body {
+            width: 100vw; /* 视口宽度 */
+            height: 100vh; /* 视口高度 */
+            overflow: hidden; /* 隐藏溢出内容 */
+            position: relative;
+            background-color: #000; /* 黑色背景 */
+        }
+
+        /* ==================== 开场视频容器样式 ==================== */
+        .video-container {
+            position: fixed; /* 固定定位 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999; /* 最高层级 */
+            background: #000;
+            cursor: pointer; /* 点击跳过提示 */
+        }
+
+        /* 视频元素样式 */
+        #start-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 覆盖填充 */
+        }
+
+        /* 视频隐藏动画类 */
+        .video-hide {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease, visibility 0s 1s;
+        }
+
+        /* ==================== 主界面容器样式 ==================== */
+        .main-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: none; /* 默认隐藏 */
+            opacity: 0;
+        }
+
+        /* 主界面显示动画类 */
+        .main-show {
+            display: block;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+
+        /* ==================== 海底背景层样式 ==================== */
+        .sea-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* 底层 */
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* 背景滚动容器 */
+        .bg-move {
+            position: absolute;
+            height: 100%;
+            width: 800%; /* 8张图片宽度 */
+            display: flex;
+            left: 0;
+        }
+
+        /* 背景图片样式 */
+        .bg-move img {
+            height: 100%;
+            width: 12.5%; /* 每张图片占12.5%（100% / 8） */
+            object-fit: cover;
+            margin-left: -1.5%; /* 图片重叠实现无缝衔接 */
+            /* 渐变遮罩：边缘透明实现自然过渡 */
+            -webkit-mask-image: linear-gradient(
+                to right,
+                transparent 0%, /* 左边缘透明 */
+                black 5%, /* 5%处完全不透明 */
+                black 95%, /* 95%处完全不透明 */
+                transparent 100% /* 右边缘透明 */
+            );
+            mask-image: linear-gradient(
+                to right,
+                transparent 0%,
+                black 5%,
+                black 95%,
+                transparent 100%
+            );
+        }
+
+        /* 第一张图片不偏移 */
+        .bg-move img:first-child {
+            margin-left: 0;
+        }
+
+        /* ==================== 海洋生物层样式 ==================== */
+        .fish-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); /* 居中 */
+            width: 55%;
+            aspect-ratio: 1/1; /* 1:1比例 */
+            z-index: 2;
+        }
+
+        /* 鱼类通用样式 - 使用按钮元素 */
+        .fish {
+            position: absolute;
+            width: 80px;
+            height: auto;
+            cursor: pointer; /* 可点击 */
+            transition: transform 0.3s ease, filter 0.3s ease;
+            z-index: 5;
+            border: none;
+            background: transparent;
+            padding: 0;
+            outline: none;
+        }
+
+        /* 鱼类按钮内的图片样式 */
+        .fish img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+
+        /* 鱼类悬停效果 */
+        .fish:hover img {
+            transform: scale(1.2); /* 放大 */
+            filter: brightness(1.2) drop-shadow(0 0 10px rgba(255, 255, 255, 0.5)); /* 发光效果 */
+        }
+
+        /* 鱼类点击效果 */
+        .fish:active img {
+            transform: scale(0.95); /* 缩小 */
+        }
+
+        /* ==================== 潜水艇窗户遮罩层样式 ==================== */
+        .window-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10; /* 高层级 */
+            pointer-events: none; /* 不响应鼠标事件 */
+        }
+
+        /* 窗户图片样式 */
+        #window-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* ==================== 标题样式 ==================== */
+        .title {
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%); /* 水平居中 */
+            z-index: 11;
+            font-size: 48px;
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color);
+            animation: titleGlow 3s ease-in-out infinite; /* 发光动画 */
+            font-weight: bold;
+            letter-spacing: 4px; /* 字间距 */
+        }
+
+        /* 标题发光动画 */
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 10px var(--primary-color); }
+            50% { text-shadow: 0 0 25px var(--primary-color), 0 0 35px var(--primary-color); }
+        }
+
+        /* ==================== 控制按钮样式 ==================== */
+        .control-buttons {
+            position: absolute;
+            bottom: 25%;
+            left: 0;
+            right: 0;
+            z-index: 11;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 5%;
+        }
+
+        /* 按钮通用样式 */
+        .control-btn {
+            width: 70px;
+            height: 70px;
+            background: rgba(26, 82, 118, 0.8);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 按钮悬停效果 */
+        .control-btn:hover {
+            transform: scale(1.15);
+            background: rgba(26, 82, 118, 0.95);
+            border-color: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 按钮按下效果 */
+        .control-btn:active {
+            transform: scale(1.05);
+        }
+
+        /* 箭头图标样式 */
+        .control-btn svg {
+            width: 32px;
+            height: 32px;
+            fill: currentColor;
+        }
+
+        /* ==================== AI悬浮助手样式 ==================== */
+        .ai-float {
+            position: fixed;
+            right: 30px;
+            top: 50%;
+            z-index: 100;
+            width: 60px;
+            height: 60px;
+            cursor: grab; /* 可拖动 */
+            user-select: none; /* 禁止选中 */
+        }
+
+        /* 拖动时的光标 */
+        .ai-float.dragging {
+            cursor: grabbing;
+        }
+
+        /* AI球体样式 */
+        .ai-ball {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-color);
+            border-radius: 50%; /* 圆形 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: var(--shadow);
+            animation: breathe 2s ease-in-out infinite; /* 呼吸动画 */
+            pointer-events: none;
+        }
+
+        /* 拖动时球体效果 */
+        .ai-float.dragging .ai-ball {
+            animation: none;
+            transform: scale(1.1);
+        }
+
+        /* 呼吸动画 */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.9; }
+            50% { transform: scale(1.15); opacity: 1; }
+        }
+
+        /* AI聊天窗口样式 */
+        .ai-chat {
+            position: fixed;
+            width: 320px;
+            height: 450px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            z-index: 101;
+            display: none; /* 默认隐藏 */
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* 聊天窗口显示类 */
+        .ai-chat.show {
+            display: flex;
+        }
+
+        /* 聊天头部样式 */
+        .chat-header {
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        /* 聊天内容区域样式 */
+        .chat-content {
+            flex: 1; /* 占据剩余空间 */
+            padding: 15px;
+            overflow-y: auto; /* 垂直滚动 */
+            color: #333;
+        }
+
+        /* 消息气泡样式 */
+        .message {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 15px;
+            margin-bottom: 10px;
+            max-width: 80%;
+        }
+
+        /* 聊天输入区域样式 */
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: white;
+        }
+
+        /* 输入框样式 */
+        #chat-input-text {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #eee;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        /* 发送按钮样式 */
+        #send-btn {
+            margin-left: 10px;
+            padding: 10px 20px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* ==================== 鱼类对话框样式 ==================== */
+        .fish-dialog {
+            position: fixed;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
+            border-radius: 20px;
+            padding: 0;
+            width: 1100px;
+            max-height: 100vh;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25), 0 5px 15px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: fishDialogShow 0.3s ease;
+            pointer-events: auto;
+            overflow: hidden;
+            border: 2px solid rgba(135, 206, 235, 0.4);
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 鱼类对话框显示动画 */
+        @keyframes fishDialogShow {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* 鱼类对话框隐藏动画 */
+        .fish-dialog-hide {
+            animation: fishDialogHide 0.3s ease forwards;
+        }
+
+        @keyframes fishDialogHide {
+            from {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        /* 对话框头部 */
+        .fish-dialog-header {
+            background: linear-gradient(135deg, #1a5276 0%, #2980b9 50%, #3498db 100%);
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        /* 图鉴图标 */
+        .fish-dialog-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        /* 名称容器 */
+        .fish-dialog-names {
+            flex: 1;
+        }
+
+        /* 鱼类中文名称 */
+        .fish-dialog-name {
+            font-weight: bold;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        /* 鱼类英文名称 */
+        .fish-dialog-english {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        /* 鱼类学名 */
+        .fish-dialog-scientific {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-style: italic;
+            margin-top: 2px;
+        }
+
+        /* 对话框内容区域 */
+        .fish-dialog-content {
+            position: relative;
+            display: block;
+            padding: 25px;
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+
+        /* 左侧文字区域 */
+        .fish-dialog-text {
+            width: 100%;
+            padding-right: 450px; /* 为右上角图片留出空间 */
+        }
+
+        /* 信息标签 */
+        .fish-dialog-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .fish-dialog-tag {
+            background: linear-gradient(135deg, #e8f4fd 0%, #d6eaf8 100%);
+            color: #1a5276;
+            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 600;
+            border: 1px solid #b8d4e8;
+        }
+
+        /* 信息网格 */
+        .fish-dialog-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e8f4fd 100%);
+            border-radius: 10px;
+        }
+
+        /* 信息项 */
+        .fish-dialog-info {
+            padding: 0;
+        }
+
+        .fish-dialog-info-label {
+            font-size: 12px;
+            color: #888;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .fish-dialog-info-value {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        /* 鱼类描述样式 */
+        .fish-dialog-desc {
+            font-size: 15px;
+            color: #444;
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        /* 右上角图片区域 - 绝对定位 */
+        .fish-dialog-image {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            max-width: 400px;
+            max-height: 500px;
+            overflow: hidden;
+            border-radius: 15px;
+            background: #f8f9fa;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fish-dialog-image img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain; /* 按原比例显示，不裁剪 */
+        }
+
+        /* 底部信息栏 */
+        .fish-dialog-footer {
+            background: linear-gradient(90deg, #f8f9fa 0%, #e8f4fd 100%);
+            padding: 12px 25px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .fish-dialog-status {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .fish-dialog-status span {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        /* 关闭按钮 */
+        .fish-dialog-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            z-index: 10;
+        }
+
+        .fish-dialog-close:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- ==================== 开场视频层 ==================== -->
+    <div class="video-container" id="videoContainer">
+        <video id="start-video" autoplay muted>
+            <source src="start.mp4" type="video/mp4">
+        </video>
+        <!-- 背景音乐 -->
+        <audio id="bg-music" autoplay>
+            <source src="start.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <!-- ==================== 主界面容器 ==================== -->
+    <div class="main-container" id="mainContainer">
+        <!-- 海底滚动背景层 -->
+        <div class="sea-background">
+            <div class="bg-move" id="bgMove">
+                <!-- 循环排列的背景图片：sea01和sea02交替，共8张实现无缝循环 -->
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+                <img src="sea01.jpg" alt="">
+                <img src="sea02.jpg" alt="">
+            </div>
+        </div>
+
+        <!-- 海洋生物层 -->
+        <div class="fish-container" id="fishContainer">
+            <!-- 海洋生物将通过JavaScript动态生成和管理 -->
+        </div>
+
+        <!-- 潜水艇窗户遮罩 -->
+        <div class="window-mask">
+            <img src="background.png" id="window-img" alt="潜水艇窗户">
+        </div>
+
+        <!-- 页面标题 -->
+        <h1 class="title">探索号潜水艇</h1>
+
+        <!-- 控制按钮 -->
+        <div class="control-buttons">
+            <button class="control-btn" id="prevBtn" title="后退">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <button class="control-btn" id="nextBtn" title="前进">
+                <svg viewBox="0 0 24 24"><path d="M8.59 16.59L10 18l6-6-6-6-1.41 1.41L13.17 12z"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== AI悬浮助手 ==================== -->
+    <div class="ai-float">
+        <div class="ai-ball" id="aiBall">AI</div>
+        <div class="ai-chat" id="aiChat">
+            <div class="chat-header">AI 助手</div>
+            <div class="chat-content" id="chatContent">
+                <div class="message">你好！我是你的潜水探索助手😊</div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="chat-input-text" placeholder="请输入消息...">
+                <button id="send-btn">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ==================== DOM 元素获取 ==================== */
+        const videoContainer = document.getElementById('videoContainer'); // 视频容器
+        const startVideo = document.getElementById('start-video'); // 开场视频
+        const bgMusic = document.getElementById('bg-music'); // 背景音乐
+        const mainContainer = document.getElementById('mainContainer'); // 主界面容器
+        const bgMove = document.getElementById('bgMove'); // 背景滚动容器
+        const prevBtn = document.getElementById('prevBtn'); // 后退按钮
+        const nextBtn = document.getElementById('nextBtn'); // 前进按钮
+        const aiFloat = document.querySelector('.ai-float'); // AI悬浮球
+        const aiBall = document.getElementById('aiBall'); // AI球体
+        const aiChat = document.getElementById('aiChat'); // AI聊天窗口
+        const sendBtn = document.getElementById('send-btn'); // 发送按钮
+        const chatInput = document.getElementById('chat-input-text'); // 聊天输入框
+        const chatContent = document.getElementById('chatContent'); // 聊天内容区
+
+        /* ==================== 滚动控制变量 ==================== */
+        let scrollPosition = 0; // 当前滚动位置（百分比），0表示初始位置
+        const scrollSpeed = 0.05; // 滚动速度：每次动画帧移动的百分比
+        let scrollDirection = 0; // 滚动方向：1向右滚动，-1向左滚动，0不滚动
+        let isScrolling = false; // 是否正在滚动中
+        let animationId = null; // requestAnimationFrame返回的动画ID，用于取消动画
+        const totalImages = 24; // 图片总数量
+        const imageWidth = 4.167; // 每张图片宽度（100% / 24 ≈ 4.167%）
+        const resetThreshold = -100; // 重置阈值
+
+        /* ==================== 海洋生物管理 ==================== */
+        const fishContainer = document.getElementById('fishContainer');
+        
+        // 海洋生物数据 - 共32种海洋生物
+        const fishTypes = [
+            { 
+                src: 'image/大白鲨.png',
+                dialogImage: 'image/大白鲨.jpg',
+                name: '大白鲨',
+                englishName: 'Great White Shark',
+                scientific: 'Carcharodon carcharias',
+                icon: '🦈',
+                width: 250,
+                speed: 0.07,
+                tags: ['软骨鱼类', '顶级掠食者', '易危物种'],
+                habitat: '全球温带和热带海域，偏好沿海水域',
+                diet: '鱼类、海豹、海狮、海豚等海洋哺乳动物',
+                size: '体长可达 6 米，体重可达 2.5 吨',
+                lifespan: '约 70 年以上',
+                description: '嗨！我是大白鲨，海洋里的"白色死神"～虽然我看起来很凶，但其实我很温柔呢！我有 300 多颗锋利的牙齿，呈三角形排列，每颗牙齿都有锯齿状边缘，而且会不断脱落和再生，一生中可以长出上万颗牙齿！我的嗅觉超级灵敏，能闻到几公里外血液的气味，甚至能检测出百万分之一浓度的血液！我的皮肤覆盖着盾鳞，摸起来像砂纸一样粗糙，这种结构还能帮助我减少水中阻力。作为顶级掠食者，我在海洋生态系统中扮演着重要角色，帮助维持食物链的平衡，淘汰老弱病残的个体。别怕，我很少主动攻击人类哦～我们大白鲨是卵胎生的，妈妈一次可以生下 2-12 个宝宝，小鲨鱼出生时就有 1 米多长呢！我的寿命可以达到 70 年以上，是海洋中的长寿者。保护我们，就是保护海洋的健康！',
+                status: '易危'
+            },
+            { 
+                src: 'image/蓝鲸.png',
+                dialogImage: 'image/蓝鲸.jpg',
+                name: '蓝鲸',
+                englishName: 'Blue Whale',
+                scientific: 'Balaenoptera musculus',
+                icon: '🐋',
+                width: 225,
+                speed: 0.1,
+                tags: ['须鲸科', '最大动物', '濒危物种'],
+                habitat: '全球各大洋，偏好深海区域',
+                diet: '主要以磷虾为食，每天可消耗 4 吨磷虾',
+                size: '体长可达 30 米，体重可达 180 吨',
+                lifespan: '约 80-90 年',
+                description: '你好呀！我是蓝鲸，地球上最大的动物，也是有史以来最大的生物！我的心脏有一辆小汽车那么大，舌头和大象一样重，血管粗得可以让一个小孩爬行～我用独特的歌声和同伴交流，声音可以传播数百公里，是海洋里最动听的低吟！虽然我体型庞大，但我只吃小小的磷虾哦～我是海洋里的温柔巨人！我的嘴巴里有 300-400 片鲸须板，像巨大的过滤器，帮助我从海水中过滤磷虾。我每天要吃掉 4 吨磷虾，相当于 400 万卡路里！我的宝宝出生时就有 7 米长，每天喝 400 升母乳，体重每天增加 90 公斤，是地球上成长最快的宝宝！我的寿命可以达到 80-90 年，见证海洋的沧桑变化。保护我们，让海洋继续充满生机！',
+                status: '濒危'
+            },
+            { 
+                src: 'image/乌贼.png',
+                dialogImage: 'image/乌贼.jpeg',
+                name: '乌贼',
+                englishName: 'Cuttlefish',
+                scientific: 'Sepiida',
+                icon: '🦑',
+                width: 120,
+                speed: 0.06,
+                tags: ['头足纲', '变色大师', '近危物种'],
+                habitat: '全球温带和热带浅海区域',
+                diet: '小鱼、虾、蟹等甲壳类动物',
+                size: '体长 15-50 厘米',
+                lifespan: '约 1-2 年',
+                description: '你好！我是乌贼，海洋里的"变色龙"和"伪装大师"！我可以瞬间改变皮肤颜色和纹理来伪装自己或与同伴交流，这是因为我皮肤里有数百万个色素细胞、虹彩细胞和白色素细胞！我有 W 形的瞳孔和绿色的血液（因为含有血蓝蛋白），是不是很特别？遇到危险时，我还会喷出墨汁制造"烟幕弹"逃跑呢！我的体内有一块"海螵蛸"骨头，可以帮我调节浮力～我有 8 只短触手和 2 只长触手，触手上布满吸盘，可以快速抓住猎物。我的眼睛非常发达，能分辨偏振光，这是人类都做不到的特殊能力！我的皮肤能展现各种颜色和图案，用来求偶、威胁敌人或伪装自己。我还是无脊椎动物中最聪明的，能通过迷宫测试和形状识别呢！',
+                status: '近危'
+            },
+            { 
+                src: 'image/扇贝.png',
+                dialogImage: 'image/扇贝.jpg',
+                name: '扇贝',
+                englishName: 'Scallop',
+                scientific: 'Pectinidae',
+                icon: '🐚',
+                width: 100,
+                speed: 0,
+                tags: ['双壳纲', '滤食性', '经济物种'],
+                habitat: '全球浅海沙质海底',
+                diet: '浮游生物、藻类碎屑',
+                size: '壳径 5-20 厘米',
+                lifespan: '约 5-10 年',
+                description: '嗨！我是扇贝，海底的"游泳健将"和"千眼贝"！别看我平时静静躺着，遇到危险时我会用力闭合贝壳，通过喷射水流"飞"起来逃跑，最高能游到每秒 5 米呢～我有很多只蓝色的眼睛，排列在贝壳边缘，最多可以有 200 只眼睛！这些眼睛能感知光线变化和运动，帮助我发现危险。我还是人类餐桌上的美味呢！我的眼睛有真正的晶状体和视网膜，能形成清晰的图像，这在贝类中非常罕见。我的贝壳有美丽的放射状条纹，每一只扇贝的纹路都是独一无二的，就像人类的指纹一样。我通过过滤海水中的浮游生物和有机碎屑为食，每天能过滤几十升海水，是海洋里的"净水器"。我的游泳能力在贝类中是数一数二的，可以连续游动几米远，还能控制方向呢！',
+                status: '无危'
+            },
+            { 
+                src: 'image/条纹珊瑚虾.png',
+                dialogImage: 'image/条纹珊瑚虾.jpg',
+                name: '条纹珊瑚虾',
+                englishName: 'Banded Coral Shrimp',
+                scientific: 'Stenopus hispidus',
+                icon: '🦐',
+                width: 75,
+                speed: 0.1,
+                groupSize: [1, 3],
+                tags: ['十足目', '清洁工', '珊瑚礁生物'],
+                habitat: '热带珊瑚礁区域',
+                diet: '鱼类寄生虫、残渣碎屑',
+                size: '体长 5-7 厘米',
+                lifespan: '约 2-3 年',
+                description: '你好呀！我是条纹珊瑚虾，珊瑚礁里的"清洁工"！我有着红白相间的条纹和长长的白色触须，很漂亮吧？我在珊瑚礁设立"清洁站"，帮来往的鱼儿清理寄生虫，我们互利共赢呢！我的触须还能帮鱼儿"导航"找到我～我有三对长长的白色足，上面有红色环纹，像穿着条纹袜子。我的大螯可以用来抓住鱼儿的身体，小螯用来清理寄生虫。我和小丑鱼是好朋友，经常在珊瑚礁一起生活。鱼儿们会主动游到我的"清洁站"，张开嘴巴和鳃盖，让我帮它们清理口腔和鳃部的寄生虫，这种合作关系真是太奇妙了！',
+                status: '无危'
+            },
+            { 
+                src: 'image/橙色杯珊瑚.png',
+                dialogImage: 'image/橙色杯珊瑚.jpg',
+                name: '橙色杯珊瑚',
+                englishName: 'Orange Cup Coral',
+                scientific: 'Tubastraea coccinea',
+                icon: '🪸',
+                width: 166,
+                speed: 0,
+                groupSize: [2, 3],
+                tags: ['石珊瑚', '非造礁珊瑚', '入侵物种'],
+                habitat: '热带和温带海域岩石表面',
+                diet: '浮游生物、小型甲壳类',
+                size: '珊瑚虫直径约 2-3 厘米',
+                lifespan: '珊瑚群体可存活数十年',
+                description: '嗨！我是橙色杯珊瑚，海底的"小太阳"！我有着鲜艳的橙红色，像一朵朵盛开的花。与其他珊瑚不同，我不依赖阳光和共生藻，而是在夜间伸出触手捕食浮游生物。我的美丽让我成为了水族馆的宠儿～我的每个珊瑚虫都有 12 条触手，触手上有刺细胞，可以捕捉路过的浮游生物。我是非造礁珊瑚，不需要阳光就能生存，所以能在较深的水域生长。我的繁殖能力很强，可以通过出芽生殖快速扩展群体。虽然我很美丽，但要注意我可能会入侵新的海域，影响当地生态系统哦！',
+                status: '无危'
+            },
+            { 
+                src: 'image/水母.png',
+                dialogImage: 'image/水母.jpg',
+                name: '水母',
+                englishName: 'Jellyfish',
+                scientific: 'Medusozoa',
+                icon: '🎐',
+                width: 115,
+                speed: 0.075,
+                groupSize: [1, 3],
+                tags: ['刺胞动物', '古老生物', '漂流者'],
+                habitat: '全球各大洋，从浅海到深海',
+                diet: '浮游生物、小鱼、鱼卵',
+                size: '伞径从几毫米到2米不等',
+                lifespan: '数月至数年，灯塔水母可"永生"',
+                description: '你好！我是水母，海洋里的"透明精灵"！我没有大脑、心脏和血液，身体 95% 都是水，但我已经在地球上生存了 5 亿年！我的触手上有刺细胞，可以麻痹猎物。有一种叫灯塔水母的同伴可以"返老还童"，是不是很神奇？我的身体呈伞状，通过收缩伞盖来游动。我的触手可以长达数米，用来捕捉浮游生物和小鱼。虽然我的外表美丽，但很多水母的刺细胞对人类有毒，所以不要随便触摸我们哦！我是海洋生态系统的重要组成部分，帮助控制浮游生物的数量。',
+                status: '无危'
+            },
+            { 
+                src: 'image/沙丁鱼.png',
+                dialogImage: 'image/沙丁鱼.jpg',
+                name: '沙丁鱼',
+                englishName: 'Sardine',
+                scientific: 'Sardina pilchardus',
+                icon: '🐟',
+                width: 85,
+                speed: 0.09,
+                groupSize: [5, 10],
+                tags: ['鲱科', '群居鱼类', '经济物种'],
+                habitat: '大西洋东北部和地中海',
+                diet: '浮游生物、藻类',
+                size: '体长 15-30 厘米',
+                lifespan: '约 5-10 年',
+                description: '嗨！我是沙丁鱼，海洋里的"团队协作大师"！我们喜欢成群结队游动，数量可达数百万条，形成壮观的"鱼球"。这样可以迷惑捕食者，保护群体中的每一个成员。我们还是海洋食物链的重要一环，养活了很多大型鱼类和海洋哺乳动物呢！我们的群体行动非常协调，能在瞬间改变方向，形成美丽的漩涡图案。人类喜欢把我们做成罐头，因为我们富含 Omega-3 脂肪酸，对健康很有益。保护我们的族群，就是保护海洋生态的平衡！',
+                status: '无危'
+            },
+            { 
+                src: 'image/河豚.png',
+                dialogImage: 'image/河豚.jpg',
+                name: '河豚',
+                englishName: 'Pufferfish',
+                scientific: 'Tetraodontidae',
+                icon: '🐡',
+                width: 108,
+                speed: 0.1,
+                tags: ['鲀科', '有毒鱼类', '膨胀防御'],
+                habitat: '热带和温带海域，部分淡水中',
+                diet: '贝类、甲壳类、藻类',
+                size: '体长 5-60 厘米不等',
+                lifespan: '约 4-8 年',
+                description: '你好呀！我是河豚，海洋里的"气球大师"！遇到危险时，我会吸入大量水或空气，瞬间变成一个圆滚滚的"气球"，让捕食者无从下口。我的皮肤和内脏含有剧毒的河豚毒素，但人类还是冒着风险品尝我的美味～记住，处理不当可是会致命的哦！我的牙齿融合在一起，形成像鸟喙一样的结构，可以轻松咬碎贝类和甲壳类。有些河豚还会在海底沙地上画出精美的几何图案来吸引配偶，是海洋里的"艺术家"呢！',
+                status: '易危'
+            },
+            { 
+                src: 'image/海星.png',
+                dialogImage: 'image/海星.jpg',
+                name: '海星',
+                englishName: 'Starfish',
+                scientific: 'Asteroidea',
+                icon: '⭐',
+                width: 100,
+                speed: 0,
+                tags: ['棘皮动物', '再生能力', '捕食者'],
+                habitat: '全球各大洋浅海区域',
+                diet: '贝类、海胆、珊瑚虫',
+                size: '腕展5-50厘米不等',
+                lifespan: '约5-35年',
+                description: '嗨！我是海星，海底的"星星"！我通常有 5 只腕，但有些同伴有 40 多只呢！我的再生能力超强，断掉的腕可以重新长出来，甚至一只腕就能长成一个完整的我！我用管足移动和捕食，可以把胃翻出来消化食物，是不是很神奇？我的身体表面布满了小小的管足，每个管足都有吸盘，可以牢牢抓住岩石。我没有大脑，但有简单的神经系统，能感知光线和化学物质。我是珊瑚礁的"医生"，会吃掉生病的珊瑚，帮助珊瑚礁保持健康！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海狮.png',
+                dialogImage: 'image/海狮.jpg',
+                name: '海狮',
+                englishName: 'Sea Lion',
+                scientific: 'Otariidae',
+                icon: '🦭',
+                width: 160,
+                speed: 0.075,
+                tags: ['鳍脚类', '哺乳动物', '社会性动物'],
+                habitat: '太平洋沿岸海域',
+                diet: '鱼类、乌贼、章鱼',
+                size: '体长 1.5-2.5 米，体重 100-400 公斤',
+                lifespan: '约 20-30 年',
+                description: '你好！我是海狮，海洋里的"杂技演员"！我有外耳廓和长长的前鳍，可以在陆地上用四肢行走，还能在水中灵活游泳。我们喜欢群居，经常在岩石上晒太阳。我聪明伶俐，经常被训练表演节目，是水族馆的明星呢！我是哺乳动物，用肺呼吸，需要定期浮出水面换气。我的皮下有厚厚的脂肪层，可以保暖和储存能量。我的叫声很响亮，能在嘈杂的海浪声中被同伴听到。保护海洋环境，让我们能继续快乐地生活！',
+                status: '易危'
+            },
+            { 
+                src: 'image/海胆.png',
+                dialogImage: 'image/海胆.jpg',
+                name: '海胆',
+                englishName: 'Sea Urchin',
+                scientific: 'Echinoidea',
+                icon: '🔮',
+                width: 85,
+                speed: 0,
+                tags: ['棘皮动物', '底栖生物', '海藻控制者'],
+                habitat: '全球各大洋岩石和珊瑚礁区域',
+                diet: '海藻、海草、附着生物',
+                size: '壳径 3-10 厘米',
+                lifespan: '约 15-200 年不等',
+                description: '嗨！我是海胆，海底的"刺猬"！我浑身长满了尖锐的棘刺，可以保护自己免受捕食者侵害。我的嘴巴在腹部中央，有 5 颗牙齿，可以啃食海藻。我还能用管足和棘刺移动，虽然很慢，但我可以活很久很久呢！我的棘刺上有毒腺，被扎到会很痛，所以不要随便触摸我哦！我是海洋里的"园丁"，通过啃食海藻，帮助维持珊瑚礁和岩石生态系统的平衡。我的生殖腺（海胆黄）是人类的美食，富含蛋白质和营养！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海葵.png',
+                dialogImage: 'image/海葵.jpg',
+                name: '海葵',
+                englishName: 'Sea Anemone',
+                scientific: 'Actiniaria',
+                icon: '🌸',
+                width: 186,
+                speed: 0,
+                tags: ['刺胞动物', '共生关系', '定居者'],
+                habitat: '全球各大洋浅海区域',
+                diet: '小鱼、虾、浮游生物',
+                size: '直径1-25厘米不等',
+                lifespan: '可达50年以上',
+                description: '你好呀！我是海葵，海底的"花朵"！我看起来像一朵盛开的鲜花，但其实是一种动物。我的触手上有刺细胞，可以麻痹猎物。我和小丑鱼是好朋友，它们住在我体内，我保护它们，它们帮我清理残渣和引来猎物，我们互利共生呢！我的触手可以伸缩，遇到危险时会迅速收缩。我通常附着在岩石或珊瑚上，但也能缓慢移动。我的种类很多，颜色丰富多彩，有红色、粉色、绿色、蓝色等。我是珊瑚礁生态系统的重要组成部分，为许多小鱼提供庇护所！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海螯虾.png',
+                dialogImage: 'image/海螯虾.jpg',
+                name: '海螯虾',
+                englishName: 'Lobster',
+                scientific: 'Nephropidae',
+                icon: '🦞',
+                width: 145,
+                speed: 0.1,
+                tags: ['十足目', '甲壳类', '经济物种'],
+                habitat: '大西洋和太平洋沿岸海域',
+                diet: '贝类、小鱼、海藻',
+                size: '体长 20-60 厘米',
+                lifespan: '约 50-100 年',
+                description: '嗨！我是海螯虾，海底的"装甲战士"！我有着坚硬的外壳和两只大螯，一只用来切割，一只用来压碎。我每年都要蜕壳长大，这时候是最脆弱的。有趣的是，我可能长生不老，因为我的细胞可以不断更新！我的外壳含有虾青素，煮熟后会变成红色。我有 10 条腿，前面两条进化成了大螯。我的血液是蓝色的，因为含有铜元素而不是铁元素。我是海洋里的美味，但请适度捕捞，保护我们的族群！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海螺.png',
+                dialogImage: 'image/海螺.jpg',
+                name: '海螺',
+                englishName: 'Sea Snail',
+                scientific: 'Gastropoda',
+                icon: '🐚',
+                width: 93,
+                speed: 0,
+                tags: ['腹足纲', '软体动物', '底栖生物'],
+                habitat: '全球各大洋浅海区域',
+                diet: '藻类、腐肉、小型无脊椎动物',
+                size: '壳高 5-30 厘米不等',
+                lifespan: '约 5-25 年',
+                description: '你好！我是海螺，海底的"旅行者"！我背着自己的"房子"到处走，遇到危险就缩进壳里。我的壳上有美丽的花纹，是人类喜爱的收藏品。我可以用腹足慢慢爬行，还能分泌黏液帮助移动。凤凰螺还有漂亮的眼柄呢！我的壳是螺旋形的，随着我的成长而变大。我用齿舌刮食藻类，是海洋里的"清洁工"。有些海螺还能发出美妙的声音，被称为"海螺号角"！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海豚.png',
+                dialogImage: 'image/海豚.jpg',
+                name: '海豚',
+                englishName: 'Dolphin',
+                scientific: 'Delphinidae',
+                icon: '🐬',
+                width: 160,
+                speed: 0.1,
+                tags: ['齿鲸亚目', '哺乳动物', '高智商'],
+                habitat: '全球温带和热带海域',
+                diet: '鱼类、乌贼、虾',
+                size: '体长 1.5-4 米，体重 100-500 公斤',
+                lifespan: '约 40-60 年',
+                description: '嗨！我是海豚，海洋里的"精灵"！我是哺乳动物，需要浮出水面呼吸。我用回声定位来感知周围环境，可以精确识别物体。我喜欢跳跃和玩耍，经常成群结队活动。人类说我很聪明，我确实能理解很多指令呢！我的大脑很发达，有自我意识，能识别镜子中的自己。我和同伴之间有复杂的交流方式，每只海豚都有独特的"名字"（签名哨声）。我是人类的好朋友，经常帮助渔民驱赶鱼群！',
+                status: '无危'
+            },
+            { 
+                src: 'image/海马.png',
+                dialogImage: 'image/海马.jpg',
+                name: '海马',
+                englishName: 'Seahorse',
+                scientific: 'Hippocampus',
+                icon: '🐴',
+                width: 78,
+                speed: 0.1,
+                tags: ['海龙科', '雄性育儿', '伪装大师'],
+                habitat: '热带和温带浅海海草区',
+                diet: '小型甲壳类、浮游生物',
+                size: '体长 1.5-35 厘米不等',
+                lifespan: '约 1-5 年',
+                description: '你好呀！我是海马，海洋里的"小骑士"！我长得像马，其实是鱼类。我用尾巴卷住海草固定自己，用背鳍快速扇动前进。最特别的是，我们是由爸爸来"生孩子"的！爸爸有一个育儿袋，妈妈把卵产在里面，爸爸负责孵化～我的眼睛可以独立转动，一只眼睛看前面，一只看后面。我是伪装高手，身体颜色能随环境改变。由于栖息地破坏和过度捕捞，我们面临生存威胁，请保护我们！',
+                status: '易危'
+            },
+            { 
+                src: 'image/海龟.png',
+                dialogImage: 'image/海龟.jpg',
+                name: '海龟',
+                englishName: 'Sea Turtle',
+                scientific: 'Chelonioidea',
+                icon: '🐢',
+                width: 145,
+                speed: 0.12,
+                tags: ['爬行纲', '洄游动物', '濒危物种'],
+                habitat: '全球热带和亚热带海域',
+                diet: '海藻、水母、海绵（因种类而异）',
+                size: '壳长 60-180 厘米',
+                lifespan: '约 50-100 年',
+                description: '嗨！我是海龟，海洋里的"长寿者"！我已经在地球上生存了 1 亿多年，和恐龙是同时代的生物。我会洄游数千公里回到出生的海滩产卵。可惜，我们面临着塑料污染、栖息地破坏等威胁，很多同伴都濒临灭绝了...我的壳由 60 多块骨头组成，既坚固又轻便。我用鳍状肢游泳，可以潜入深海。绿海龟主要吃海草，玳瑁喜欢吃海绵，蠵龟喜欢吃水母。保护海洋环境，让我们能继续在这片蓝色家园生活！',
+                status: '濒危'
+            },
+            { 
+                src: 'image/牡蛎.png',
+                dialogImage: 'image/牡蛎.jpg',
+                name: '牡蛎',
+                englishName: 'Oyster',
+                scientific: 'Ostreidae',
+                icon: '🦪',
+                width: 85,
+                speed: 0,
+                tags: ['双壳纲', '滤食性', '造礁者'],
+                habitat: '全球温带和热带浅海区域',
+                diet: '浮游生物、藻类',
+                size: '壳长5-30厘米',
+                lifespan: '约10-20年',
+                description: '你好！我是牡蛎，海底的"净水器"！我每天可以过滤200升海水，净化海洋环境。我喜欢群居，形成牡蛎礁，为很多海洋生物提供栖息地。我还能产生美丽的珍珠，是人类喜爱的美食和珍宝来源呢！',
+                status: '无危'
+            },
+            { 
+                src: 'image/珊瑚虫.png',
+                dialogImage: 'image/珊瑚虫.jpg',
+                name: '珊瑚虫',
+                englishName: 'Coral Polyp',
+                scientific: 'Anthozoa',
+                icon: '🪸',
+                width: 140,
+                speed: 0,
+                groupSize: [2, 3],
+                tags: ['刺胞动物', '造礁生物', '共生关系'],
+                habitat: '热带浅海区域',
+                diet: '共生藻类光合作用产物、浮游生物',
+                size: '珊瑚虫直径几毫米',
+                lifespan: '珊瑚群体可存活数百年',
+                description: '嗨！我是珊瑚虫，海洋里的"建筑师"！我分泌碳酸钙建造坚硬的外壳，一代又一代积累形成壮观的珊瑚礁。我和体内的共生藻互利共生，它们给我提供营养，我给它们提供住所。珊瑚礁是海洋的"热带雨林"，养育了四分之一的海洋生物！',
+                status: '易危'
+            },
+            { 
+                src: 'image/白鲸.png',
+                dialogImage: 'image/白鲸.jpg',
+                name: '白鲸',
+                englishName: 'Beluga Whale',
+                scientific: 'Delphinapterus leucas',
+                icon: '🐋',
+                width: 190,
+                speed: 0.12,
+                tags: ['齿鲸亚目', '北极生物', '近危物种'],
+                habitat: '北极和亚北极海域',
+                diet: '鱼类、甲壳类、头足类',
+                size: '体长4-6米，体重1000-1500公斤',
+                lifespan: '约35-50年',
+                description: '你好呀！我是白鲸，北极的"白色精灵"！我有着雪白的皮肤和圆圆的额头，看起来总是在微笑。我可以改变额头形状发出各种声音，被称为"海洋金丝雀"。我喜欢群居，经常在浅水区玩耍，还会把头探出水面观察周围呢！',
+                status: '近危'
+            },
+            { 
+                src: 'image/眼斑海葵鱼（小丑鱼）.png',
+                dialogImage: 'image/眼斑海葵鱼(小丑鱼).jpg',
+                name: '小丑鱼',
+                englishName: 'Clownfish',
+                scientific: 'Amphiprion ocellaris',
+                icon: '🐠',
+                width: 78,
+                speed: 0.12,
+                groupSize: [5, 8],
+                tags: ['雀鲷科', '共生关系', '珊瑚礁生物'],
+                habitat: '印度洋-太平洋珊瑚礁区域',
+                diet: '浮游生物、藻类、海葵残渣',
+                size: '体长8-11厘米',
+                lifespan: '约6-10年',
+                description: '嗨！我是小丑鱼，珊瑚礁里的"明星"！我有着橙白相间的条纹，因为电影《海底总动员》而闻名世界。我和海葵是好朋友，住在我有毒的触手间，它保护我，我帮它清理残渣和引来猎物。有趣的是，我们出生时都是雄性，群体中最大的会变成雌性呢！',
+                status: '无危'
+            },
+            { 
+                src: 'image/石斑鱼.png',
+                dialogImage: 'image/石斑鱼.jpg',
+                name: '石斑鱼',
+                englishName: 'Grouper',
+                scientific: 'Epinephelinae',
+                icon: '🐟',
+                width: 130,
+                speed: 0.1,
+                tags: ['鮨科', '顶级掠食者', '经济物种'],
+                habitat: '热带和亚热带珊瑚礁区域',
+                diet: '鱼类、甲壳类、头足类',
+                size: '体长30-100厘米，最大可达2.7米',
+                lifespan: '约20-50年',
+                description: '你好！我是石斑鱼，珊瑚礁里的"伏击大师"！我喜欢躲在岩石缝隙中，等待猎物靠近后突然出击。我可以改变体色来伪装自己，有些同伴还能从雌性变成雄性呢！我是人类喜爱的食用鱼，但过度捕捞让我们面临威胁...',
+                status: '易危'
+            },
+            { 
+                src: 'image/章鱼.png',
+                dialogImage: 'image/章鱼.jpg',
+                name: '章鱼',
+                englishName: 'Octopus',
+                scientific: 'Octopoda',
+                icon: '🐙',
+                width: 115,
+                speed: 0.075,
+                tags: ['头足纲', '高智商', '伪装大师'],
+                habitat: '全球各大洋，从浅海到深海',
+                diet: '贝类、蟹类、小鱼',
+                size: '腕展可达3米（北太平洋巨型章鱼）',
+                lifespan: '约1-5年',
+                description: '嗨！我是章鱼，海洋里的"变形金刚"！我有8只灵活的腕和3颗心脏，蓝色的血液。我可以瞬间改变皮肤颜色和纹理来伪装自己，还能喷墨汁逃跑。我是无脊椎动物中最聪明的，可以开罐头、走迷宫、甚至使用工具呢！',
+                status: '无危'
+            },
+            { 
+                src: 'image/蓝环章鱼.png',
+                dialogImage: 'image/蓝环章鱼.jpg',
+                name: '蓝环章鱼',
+                englishName: 'Blue-ringed Octopus',
+                scientific: 'Hapalochlaena',
+                icon: '🐙',
+                width: 85,
+                speed: 0.12,
+                tags: ['头足纲', '剧毒生物', '小型章鱼'],
+                habitat: '印度洋-太平洋浅海区域',
+                diet: '小型甲壳类、小鱼',
+                size: '腕展12-20厘米',
+                lifespan: '约2年',
+                description: '你好！我是蓝环章鱼，海洋里的"美丽杀手"！我体型虽小，但毒性极强，一只我体内的毒素可以杀死26个成年人。当我兴奋或受到威胁时，身上的蓝色圆环会闪烁发光。虽然我很危险，但只要不触碰我，我不会主动攻击哦！',
+                status: '无危'
+            },
+            { 
+                src: 'image/蓝鲨.png',
+                dialogImage: 'image/蓝鲨.jpg',
+                name: '蓝鲨',
+                englishName: 'Blue Shark',
+                scientific: 'Prionace glauca',
+                icon: '🦈',
+                width: 175,
+                speed: 0.085,
+                tags: ['真鲨科', '远洋鲨鱼', '近危物种'],
+                habitat: '全球温带和热带远洋海域',
+                diet: '鱼类、乌贼、甲壳类',
+                size: '体长2-3.5米',
+                lifespan: '约20年',
+                description: '嗨！我是蓝鲨，海洋里的"旅行者"！我有着美丽的靛蓝色背部，是世界上最分布广泛的鲨鱼之一。我可以洄游数千公里寻找食物。可惜，人类每年捕杀大量我的同伴，主要为了鱼翅，让我们面临生存危机...',
+                status: '近危'
+            },
+            { 
+                src: 'image/蛞蝓.png',
+                dialogImage: 'image/蛞蝓.jpg',
+                name: '海蛞蝓',
+                englishName: 'Sea Slug',
+                scientific: 'Nudibranchia',
+                icon: '🐌',
+                width: 78,
+                speed: 0.02,
+                tags: ['腹足纲', '色彩斑斓', '裸鳃类'],
+                habitat: '全球各大洋浅海区域',
+                diet: '海绵、珊瑚、水螅（因种类而异）',
+                size: '体长0.5-30厘米不等',
+                lifespan: '约数月至1年',
+                description: '你好呀！我是海蛞蝓，海底的"宝石"！我有着绚丽多彩的外表，被称为"海中的蝴蝶"。我没有壳，但可以从食物中获取毒素来保护自己。有些同伴还能进行光合作用呢！虽然我体型小，寿命短，但我活得很精彩～',
+                status: '无危'
+            },
+            { 
+                src: 'image/蝙蝠鱼.png',
+                dialogImage: 'image/蝙蝠鱼.jpg',
+                name: '蝙蝠鱼',
+                englishName: 'Batfish',
+                scientific: 'Ogcocephalidae',
+                icon: '🐟',
+                width: 108,
+                speed: 0.075,
+                tags: ['鮟鱇目', '底栖鱼类', '伪装大师'],
+                habitat: '热带和亚热带深海区域',
+                diet: '小鱼、甲壳类、蠕虫',
+                size: '体长20-40厘米',
+                lifespan: '约5-10年',
+                description: '嗨！我是蝙蝠鱼，海底的"行走的鱼"！我有着扁平的身体和像手脚一样的鳍，可以在海底"走路"。我头顶有一个"钓竿"，可以分泌诱饵吸引猎物。虽然我游泳不太行，但我用独特的方式在海底生活得很自在～',
+                status: '无危'
+            },
+            { 
+                src: 'image/金枪鱼.png',
+                dialogImage: 'image/金枪鱼.jpg',
+                name: '金枪鱼',
+                englishName: 'Tuna',
+                scientific: 'Thunnus',
+                icon: '🐟',
+                width: 145,
+                speed: 0.11,
+                groupSize: [3, 4],
+                tags: ['鲭科', '高速游泳', '经济物种'],
+                habitat: '全球温带和热带远洋海域',
+                diet: '鱼类、乌贼、甲壳类',
+                size: '体长40-300厘米不等',
+                lifespan: '约15-50年',
+                description: '你好！我是金枪鱼，海洋里的"游泳健将"！我可以以80公里/小时的速度游泳，是海洋中游得最快的鱼类之一。我必须不断游动才能呼吸，所以一生都在旅行。我是人类重要的食用鱼，但过度捕捞让很多同伴濒临灭绝...',
+                status: '易危'
+            },
+            { 
+                src: 'image/鱿鱼.png',
+                dialogImage: 'image/鱿鱼.jpg',
+                name: '鱿鱼',
+                englishName: 'Squid',
+                scientific: 'Teuthida',
+                icon: '🦑',
+                width: 115,
+                speed: 0.085,
+                tags: ['头足纲', '喷水推进', '群居动物'],
+                habitat: '全球各大洋，从浅海到深海',
+                diet: '小鱼、虾、蟹',
+                size: '体长20厘米至13米不等',
+                lifespan: '约1-3年',
+                description: '嗨！我是鱿鱼，海洋里的"火箭"！我用喷水推进的方式高速前进，还能用变色来伪装或交流。我有10只腕，其中2只是捕食用的触腕。大王酸浆鱿是我的远房亲戚，是世界上最大的无脊椎动物，体长可达13米呢！',
+                status: '无危'
+            },
+            { 
+                src: 'image/鲍鱼.png',
+                dialogImage: 'image/鲍鱼.jpg',
+                name: '鲍鱼',
+                englishName: 'Abalone',
+                scientific: 'Haliotis',
+                icon: '🐚',
+                width: 100,
+                speed: 0,
+                tags: ['腹足纲', '经济物种', '珍稀贝类'],
+                habitat: '全球温带沿海岩石区域',
+                diet: '海藻、附着生物',
+                size: '壳长10-30厘米',
+                lifespan: '约30-40年',
+                description: '你好！我是鲍鱼，海底的"软黄金"！我的壳上有排列整齐的呼吸孔，壳内有着美丽的珍珠光泽。我是人类餐桌上的珍馐美味，也是中药材。可惜过度捕捞让我们数量急剧减少，现在很多地方都开始人工养殖了～',
+                status: '易危'
+            },
+            { 
+                src: 'image/黄貂鱼.png',
+                dialogImage: 'image/黄貂鱼.jpg',
+                name: '黄貂鱼',
+                englishName: 'Stingray',
+                scientific: 'Dasyatidae',
+                icon: '🐟',
+                width: 160,
+                speed: 0.125,
+                tags: ['鳐科', '底栖鱼类', '有毒刺'],
+                habitat: '全球热带和温带浅海区域',
+                diet: '贝类、虾蟹、小鱼',
+                size: '体盘宽可达2米',
+                lifespan: '约15-25年',
+                description: '嗨！我是黄貂鱼，海底的"飞毯"！我有着扁平的菱形身体，像在水中飞翔一样优雅地游动。我的尾巴上有毒刺，可以保护自己免受捕食者侵害。我喜欢把自己埋在沙子里，等待猎物经过。别踩到我哦，我会自卫的！',
+                status: '近危'
+            }
+        ];
+        
+        // 活跃的海洋生物列表
+        let activeFish = [];
+        
+        // 初始化海洋生物
+        function initFish() {
+            // 初始生成 15 条鱼（普通位置 20%-70%）
+            for (let i = 0; i < 15; i++) {
+                createFish(true);
+            }
+            // 底部固定生物只在背景滚动时从右侧边缘生成
+        }
+        
+        // 创建一条海洋生物（支持成群生成）
+        // @param {boolean} fromEdge - 是否从边缘生成
+        function createFish(fromEdge = false) {
+            const fishType = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+            
+            // 确定群组大小
+            let groupCount = 1;
+            if (fishType.groupSize) {
+                const [min, max] = fishType.groupSize;
+                groupCount = min + Math.floor(Math.random() * (max - min + 1));
+            }
+            
+            // 生成群组中的所有生物
+            for (let g = 0; g < groupCount; g++) {
+                // 创建按钮元素
+                const fish = document.createElement('button');
+                fish.className = 'fish';
+                fish.type = 'button';
+                
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.src = fishType.src;
+                img.alt = fishType.name;
+                fish.appendChild(img);
+                
+                // 随机大小浮动（±20%），使体型不完全相同
+                const sizeVariation = 0.8 + Math.random() * 0.4; // 0.8~1.2
+                const finalWidth = Math.round(fishType.width * sizeVariation);
+                fish.style.width = finalWidth + 'px';
+                
+                // 随机垂直位置（20% - 70%）
+                const top = 20 + Math.random() * 50;
+                fish.style.top = top + '%';
+                
+                // 水平位置
+                let left;
+                if (fromEdge) {
+                    // 从边缘生成：第一个在边缘，群组内相邻
+                    if (g === 0) {
+                        const direction = Math.random() > 0.5 ? 1 : -1;
+                        left = direction === 1 ? -15 : 105;
+                    } else {
+                        left = parseFloat(fishContainer.lastElementChild.style.left) + (Math.random() - 0.5) * 10;
+                    }
+                } else {
+                    // 随机位置：群组内相邻
+                    if (g === 0) {
+                        left = 10 + Math.random() * 80;
+                    } else {
+                        left = parseFloat(fishContainer.lastElementChild.style.left) + (Math.random() - 0.5) * 10;
+                    }
+                }
+                fish.style.left = left + '%';
+                
+                // 随机移动方向
+                // 如果 speed 为 0，则不移动（direction 设为 0）
+                const direction = fishType.speed === 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
+                // 基于生物自身 speed 属性，添加±10% 的小浮动，使同种生物速度相近
+                const baseSpeed = fishType.speed || 0.2;
+                const speedVariation = 0.9 + Math.random() * 0.2; // 0.9~1.1
+                const speed = baseSpeed * speedVariation;
+                fish.dataset.direction = direction;
+                fish.dataset.speed = speed;
+                
+                // 根据方向设置图片翻转：向左移动 (-1) 为原图，向右移动 (1) 为镜像
+                if (direction === 1) {
+                    img.style.transform = 'scaleX(-1)';
+                }
+                
+                // 添加鼠标悬停事件：悬停时停止移动
+                fish.addEventListener('mouseenter', () => {
+                    fish.dataset.hover = 'true';
+                });
+                fish.addEventListener('mouseleave', () => {
+                    fish.dataset.hover = 'false';
+                });
+                
+                // 添加点击事件
+                fish.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showFishDialog(fish, fishType);
+                });
+                
+                fishContainer.appendChild(fish);
+                activeFish.push(fish);
+            }
+        }
+        
+        // 创建底部固定海洋生物
+        function createBottomFish(fishType) {
+            // 确定群组大小
+            let groupCount = 1;
+            if (fishType.groupSize) {
+                const [min, max] = fishType.groupSize;
+                groupCount = min + Math.floor(Math.random() * (max - min + 1));
+            }
+            
+            // 生成群组中的所有生物
+            for (let g = 0; g < groupCount; g++) {
+                // 创建按钮元素
+                const fish = document.createElement('button');
+                fish.className = 'fish';
+                fish.type = 'button';
+                
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.src = fishType.src;
+                img.alt = fishType.name;
+                fish.appendChild(img);
+                
+                // 随机大小浮动（±20%）
+                const sizeVariation = 0.8 + Math.random() * 0.4;
+                const finalWidth = Math.round(fishType.width * sizeVariation);
+                fish.style.width = finalWidth + 'px';
+                
+                // 固定垂直位置（65% - 85%）
+                const top = 65 + Math.random() * 20;
+                fish.style.top = top + '%';
+                
+                // 水平位置：每个生物都独立分散在屏幕右侧（60%-95%）
+                // 第一个生物随机位置，后续生物在附近但有间隔
+                let left;
+                if (g === 0) {
+                    // 第一个在 60%-95% 范围内随机（右侧区域）
+                    left = 60 + Math.random() * 35;
+                } else {
+                    // 后续生物与第一个保持一定距离（±10%-20%）
+                    const prevLeft = parseFloat(fishContainer.lastElementChild.style.left);
+                    const offset = (Math.random() > 0.5 ? 1 : -1) * (10 + Math.random() * 10);
+                    left = prevLeft + offset;
+                    // 确保在右侧区域且不超出屏幕（55%-95%）
+                    left = Math.max(55, Math.min(95, left));
+                }
+                fish.style.left = left + '%';
+                
+                // 固定生物不移动
+                fish.dataset.direction = 0;
+                fish.dataset.speed = 0;
+                
+                // 添加鼠标悬停事件
+                fish.addEventListener('mouseenter', () => {
+                    fish.dataset.hover = 'true';
+                });
+                fish.addEventListener('mouseleave', () => {
+                    fish.dataset.hover = 'false';
+                });
+                
+                // 添加点击事件
+                fish.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showFishDialog(fish, fishType);
+                });
+                
+                fishContainer.appendChild(fish);
+                activeFish.push(fish);
+            }
+        }
+        
+        // 显示海洋生物对话框
+        function showFishDialog(fishElement, fishType) {
+            // 如果已有对话框，先移除
+            if (currentFishDialog) {
+                currentFishDialog.remove();
+            }
+            
+            const dialog = document.createElement('div');
+            dialog.className = 'fish-dialog';
+            dialog.innerHTML = `
+                <button class="fish-dialog-close" onclick="this.parentElement.remove(); currentFishDialog = null;">×</button>
+                <div class="fish-dialog-header">
+                    <div class="fish-dialog-icon">${fishType.icon}</div>
+                    <div class="fish-dialog-names">
+                        <div class="fish-dialog-name">${fishType.name}</div>
+                        <div class="fish-dialog-english">${fishType.englishName}</div>
+                        <div class="fish-dialog-scientific">${fishType.scientific}</div>
+                    </div>
+                </div>
+                <div class="fish-dialog-content">
+                    <div class="fish-dialog-text">
+                        <div class="fish-dialog-tags">
+                            ${fishType.tags.map(tag => `<span class="fish-dialog-tag">${tag}</span>`).join('')}
+                        </div>
+                        <div class="fish-dialog-image">
+                            <img src="${fishType.dialogImage}" alt="${fishType.name}">
+                        </div>
+                        <div class="fish-dialog-info-grid">
+                            <div class="fish-dialog-info">
+                                <div class="fish-dialog-info-label">📍 栖息地</div>
+                                <div class="fish-dialog-info-value">${fishType.habitat}</div>
+                            </div>
+                            <div class="fish-dialog-info">
+                                <div class="fish-dialog-info-label">🍽️ 食性</div>
+                                <div class="fish-dialog-info-value">${fishType.diet}</div>
+                            </div>
+                            <div class="fish-dialog-info">
+                                <div class="fish-dialog-info-label">📏 体型</div>
+                                <div class="fish-dialog-info-value">${fishType.size}</div>
+                            </div>
+                            <div class="fish-dialog-info">
+                                <div class="fish-dialog-info-label">⏳ 寿命</div>
+                                <div class="fish-dialog-info-value">${fishType.lifespan}</div>
+                            </div>
+                        </div>
+                        <div class="fish-dialog-desc">${fishType.description}</div>
+                    </div>
+                </div>
+                <div class="fish-dialog-footer">
+                    <div class="fish-dialog-status">🛡️ 保护级别：<span>${fishType.status}</span></div>
+                    <div class="fish-dialog-status">📖 海洋百科图鉴</div>
+                </div>
+            `;
+            
+            document.body.appendChild(dialog);
+            currentFishDialog = dialog;
+            
+            // 5秒后自动消失
+            setTimeout(() => {
+                if (dialog && dialog.parentNode) {
+                    dialog.classList.add('fish-dialog-hide');
+                    setTimeout(() => dialog.remove(), 300);
+                }
+                if (currentFishDialog === dialog) {
+                    currentFishDialog = null;
+                }
+            }, 5000);
+        }
+        
+        // 更新海洋生物位置
+        function updateFishPosition() {
+            activeFish = activeFish.filter(fish => {
+                let left = parseFloat(fish.style.left);
+                const direction = parseInt(fish.dataset.direction) || 0;
+                const speed = parseFloat(fish.dataset.speed) || 0.05;
+                
+                // 检查是否被鼠标悬停（有 hover 标记则不移动）
+                const isHovered = fish.dataset.hover === 'true';
+                
+                // 检查是否是固定生物（speed 为 0）
+                const isFixed = speed === 0;
+                
+                // 自身移动（只有在非悬停状态且不是固定生物时才移动）
+                if (direction !== 0 && !isHovered && !isFixed) {
+                    left += direction * speed;
+                }
+                
+                // 根据滚动方向叠加移动（悬停时或固定生物时不受影响）
+                if (scrollDirection !== 0 && !isHovered && !isFixed) {
+                    left += scrollDirection * 0.8;
+                }
+                
+                // 检查是否移出边界
+                if (left < -20 || left > 110) {
+                    fish.remove();
+                    return false;
+                }
+                
+                fish.style.left = left + '%';
+                return true;
+            });
+            
+            // 如果鱼数量不足，生成新鱼
+            if (activeFish.length < 25) {
+                if (scrollDirection !== 0) {
+                    // 滚动时从边缘生成（包括固定生物和会移动的鱼）
+                    // 20% 的概率生成底部固定生物，80% 的概率生成会移动的鱼
+                    if (Math.random() < 0.2) {
+                        const bottomFishTypes = fishTypes.filter(type => 
+                            type.name === '珊瑚' || type.name === '珊瑚虫' || 
+                            type.name === '牡蛎' || type.name === '扇贝' || 
+                            type.name === '海星' || type.name === '鲍鱼' || 
+                            type.name === '海螺' || type.name === '海胆' ||
+                            type.name === '海葵' || type.name === '橙色杯珊瑚' ||
+                            type.name === '海蛞蝓'
+                        );
+                        const randomBottomType = bottomFishTypes[Math.floor(Math.random() * bottomFishTypes.length)];
+                        createBottomFish(randomBottomType);
+                    } else {
+                        spawnFishFromEdge();
+                    }
+                } else {
+                    // 不滚动时只随机生成会移动的鱼
+                    spawnFishRandom();
+                }
+            }
+        }
+        
+        // 随机位置生成新的海洋生物（非滚动时使用）
+        function spawnFishRandom() {
+            // 只生成会移动的生物（speed 不为 0）
+            const movableFishTypes = fishTypes.filter(type => type.speed !== 0);
+            const fishType = movableFishTypes[Math.floor(Math.random() * movableFishTypes.length)];
+            
+            // 确定群组大小
+            let groupCount = 1;
+            if (fishType.groupSize) {
+                const [min, max] = fishType.groupSize;
+                groupCount = min + Math.floor(Math.random() * (max - min + 1));
+            }
+            
+            // 生成群组中的所有生物
+            for (let g = 0; g < groupCount; g++) {
+                // 创建按钮元素
+                const fish = document.createElement('button');
+                fish.className = 'fish';
+                fish.type = 'button';
+                
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.src = fishType.src;
+                img.alt = fishType.name;
+                fish.appendChild(img);
+                
+                // 随机大小浮动（±20%）
+                const sizeVariation = 0.8 + Math.random() * 0.4;
+                const finalWidth = Math.round(fishType.width * sizeVariation);
+                fish.style.width = finalWidth + 'px';
+                
+                fish.style.top = (20 + Math.random() * 50) + '%';
+                
+                // 水平位置：群组内相邻
+                let left;
+                if (g === 0) {
+                    const direction = Math.random() > 0.5 ? 1 : -1;
+                    left = direction === 1 ? -15 : 105;
+                } else {
+                    left = parseFloat(fishContainer.lastElementChild.style.left) + (Math.random() - 0.5) * 10;
+                }
+                fish.style.left = left + '%';
+                
+                // 随机移动方向
+                // 如果 speed 为 0，则不移动（direction 设为 0）
+                const direction = fishType.speed === 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
+                // 基于生物自身 speed 属性，添加±10% 的小浮动，使同种生物速度相近
+                const baseSpeed = fishType.speed || 0.2;
+                const speedVariation = 0.9 + Math.random() * 0.2; // 0.9~1.1
+                const speed = baseSpeed * speedVariation;
+                fish.dataset.direction = direction;
+                fish.dataset.speed = speed;
+                
+                // 根据方向设置图片翻转：向右移动时镜像
+                if (direction === 1) {
+                    img.style.transform = 'scaleX(-1)';
+                }
+                
+                // 添加鼠标悬停事件：悬停时停止移动
+                fish.addEventListener('mouseenter', () => {
+                    fish.dataset.hover = 'true';
+                });
+                fish.addEventListener('mouseleave', () => {
+                    fish.dataset.hover = 'false';
+                });
+                
+                fish.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showFishDialog(fish, fishType);
+                });
+                
+                fishContainer.appendChild(fish);
+                activeFish.push(fish);
+            }
+        }
+        
+        // 从边缘生成新的海洋生物
+        function spawnFishFromEdge() {
+            // 只生成会移动的生物（speed 不为 0）
+            const movableFishTypes = fishTypes.filter(type => type.speed !== 0);
+            const fishType = movableFishTypes[Math.floor(Math.random() * movableFishTypes.length)];
+            
+            // 确定群组大小
+            let groupCount = 1;
+            if (fishType.groupSize) {
+                const [min, max] = fishType.groupSize;
+                groupCount = min + Math.floor(Math.random() * (max - min + 1));
+            }
+            
+            // 生成群组中的所有生物
+            for (let g = 0; g < groupCount; g++) {
+                // 创建按钮元素
+                const fish = document.createElement('button');
+                fish.className = 'fish';
+                fish.type = 'button';
+                
+                // 创建图片元素
+                const img = document.createElement('img');
+                img.src = fishType.src;
+                img.alt = fishType.name;
+                fish.appendChild(img);
+                
+                // 随机大小浮动（±20%）
+                const sizeVariation = 0.8 + Math.random() * 0.4;
+                const finalWidth = Math.round(fishType.width * sizeVariation);
+                fish.style.width = finalWidth + 'px';
+                
+                fish.style.top = (20 + Math.random() * 50) + '%';
+                
+                // 水平位置：群组内相邻
+                let left;
+                if (g === 0) {
+                    // 根据滚动方向决定从哪一侧生成
+                    left = scrollDirection === -1 ? 105 : -15;
+                } else {
+                    left = parseFloat(fishContainer.lastElementChild.style.left) + (Math.random() - 0.5) * 10;
+                }
+                fish.style.left = left + '%';
+                
+                // 随机移动方向
+                // 如果 speed 为 0，则不移动（direction 设为 0）
+                const direction = fishType.speed === 0 ? 0 : (Math.random() > 0.5 ? 1 : -1);
+                // 基于生物自身 speed 属性，添加±10% 的小浮动，使同种生物速度相近
+                const baseSpeed = fishType.speed || 0.2;
+                const speedVariation = 0.9 + Math.random() * 0.2; // 0.9~1.1
+                const speed = baseSpeed * speedVariation;
+                fish.dataset.direction = direction;
+                fish.dataset.speed = speed;
+                
+                // 根据方向设置图片翻转：向右移动时镜像
+                if (direction === 1) {
+                    img.style.transform = 'scaleX(-1)';
+                }
+                
+                // 添加鼠标悬停事件：悬停时停止移动
+                fish.addEventListener('mouseenter', () => {
+                    fish.dataset.hover = 'true';
+                });
+                fish.addEventListener('mouseleave', () => {
+                    fish.dataset.hover = 'false';
+                });
+                
+                fish.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showFishDialog(fish, fishType);
+                });
+                
+                fishContainer.appendChild(fish);
+                activeFish.push(fish);
+            }
+        }
+
+        /* ==================== 视频处理 ==================== */
+        // 播放背景音乐
+        function playBgMusic() {
+            bgMusic.play()
+                .then(() => {
+                    console.log('音乐开始播放：start.mp3');
+                })
+                .catch(e => {
+                    console.log('音乐自动播放失败，等待用户交互:', e);
+                    // 如果自动播放失败，等待用户点击后播放
+                    document.addEventListener('click', function playMusic() {
+                        bgMusic.play().then(() => {
+                            console.log('音乐开始播放：start.mp3');
+                        });
+                        document.removeEventListener('click', playMusic);
+                    }, { once: true });
+                });
+        }
+        
+        // 页面加载完成后立即尝试播放
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', playBgMusic);
+        } else {
+            playBgMusic();
+        }
+        
+        // 音乐播放结束后切换播放 start1.mp3
+        bgMusic.addEventListener('ended', function() {
+            console.log('start.mp3 播放结束，切换为 start1.mp3');
+            bgMusic.src = 'start1.mp3';
+            bgMusic.loop = true; // 循环播放
+            bgMusic.volume = 0.3; // 音量 30%
+            bgMusic.play();
+        });
+        
+        // 视频播放结束后隐藏视频，显示主界面
+        startVideo.addEventListener('ended', hideVideo);
+        
+        // 点击视频区域可以跳过视频，并直接切换到 start1.mp3 循环播放
+        videoContainer.addEventListener('click', function() {
+            // 停止当前音乐播放
+            bgMusic.pause();
+            bgMusic.currentTime = 0;
+            
+            // 切换到 start1.mp3 循环播放
+            bgMusic.src = 'start1.mp3';
+            bgMusic.loop = true;
+            bgMusic.volume = 0.3; // 音量 30%
+            bgMusic.play().then(() => {
+                console.log('点击屏幕，开始循环播放 start1.mp3');
+            });
+            
+            // 隐藏视频，显示主界面
+            hideVideo();
+        });
+
+        /**
+         * 隐藏开场视频，显示主界面
+         * 添加淡出动画效果
+         */
+        function hideVideo() {
+            // 添加隐藏类，触发淡出动画
+            videoContainer.classList.add('video-hide');
+            // 延迟500ms后显示主界面
+            setTimeout(() => {
+                mainContainer.classList.add('main-show');
+            }, 500);
+        }
+
+        /* ==================== 背景滚动动画 ==================== */
+        /**
+         * 滚动动画函数
+         * 使用requestAnimationFrame实现平滑动画
+         * 通过图片循环实现无缝轮播，不需要跳转
+         */
+        function animateScroll() {
+            // 如果不在滚动状态，直接返回
+            if (!isScrolling) return;
+            
+            // 根据方向更新滚动位置
+            // scrollDirection为正时向右滚动（scrollPosition增加）
+            // scrollDirection为负时向左滚动（scrollPosition减少）
+            scrollPosition += scrollDirection * scrollSpeed;
+            
+            // 无缝循环：当滚动到重置阈值时，重置位置到起点
+            // 由于图片是循环排列的，重置后视觉上完全连续
+            if (scrollPosition < resetThreshold) {
+                scrollPosition += 100; // 重置到等效位置
+            } else if (scrollPosition > 0) {
+                scrollPosition -= 100; // 重置到等效位置
+            }
+            
+            // 应用CSS transform实现位移
+            bgMove.style.transform = `translateX(${scrollPosition}%)`;
+            
+            // 更新海洋生物位置
+            updateFishPosition();
+            
+            // 继续下一帧动画
+            animationId = requestAnimationFrame(animateScroll);
+        }
+
+        /**
+         * 开始滚动
+         * @param {number} direction - 滚动方向：1向右滚动，-1向左滚动
+         */
+        function startScroll(direction) {
+            // 如果已经在滚动，不重复启动
+            if (isScrolling) return;
+            
+            // 设置滚动方向
+            scrollDirection = direction;
+            // 标记为滚动状态
+            isScrolling = true;
+            // 启动动画循环
+            animationId = requestAnimationFrame(animateScroll);
+        }
+
+        /**
+         * 停止滚动
+         * 用户松开按钮时调用，可以停在任意位置
+         */
+        function stopScroll() {
+            // 标记为停止滚动状态
+            isScrolling = false;
+            // 重置滚动方向
+            scrollDirection = 0;
+            
+            // 取消动画帧，释放资源
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        // ==================== 前进按钮事件绑定 ====================
+        // 按下鼠标时开始向左滚动（背景向左移动，看到右侧新内容）
+        nextBtn.addEventListener('mousedown', () => startScroll(-1));
+        // 松开鼠标时停止滚动，可以停在任意位置
+        nextBtn.addEventListener('mouseup', stopScroll);
+        // 鼠标离开按钮时也停止滚动
+        nextBtn.addEventListener('mouseleave', stopScroll);
+        // 触摸设备支持：触摸开始时滚动
+        nextBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 阻止默认行为，防止触发mouse事件
+            startScroll(-1);
+        });
+        // 触摸结束时停止滚动
+        nextBtn.addEventListener('touchend', stopScroll);
+
+        // ==================== 后退按钮事件绑定 ====================
+        // 按下鼠标时开始向右滚动（背景向右移动，看到左侧新内容）
+        prevBtn.addEventListener('mousedown', () => startScroll(1));
+        // 松开鼠标时停止滚动，可以停在任意位置
+        prevBtn.addEventListener('mouseup', stopScroll);
+        // 鼠标离开按钮时也停止滚动
+        prevBtn.addEventListener('mouseleave', stopScroll);
+        // 触摸设备支持：触摸开始时滚动
+        prevBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // 阻止默认行为，防止触发mouse事件
+            startScroll(1);
+        });
+        // 触摸结束时停止滚动
+        prevBtn.addEventListener('touchend', stopScroll);
+
+        /* ==================== AI悬浮球拖动功能 ==================== */
+        let isDragging = false; // 是否正在拖动
+        let dragOffsetX = 0; // 拖动X偏移量
+        let dragOffsetY = 0; // 拖动Y偏移量
+        let hasMoved = false; // 是否发生了移动
+
+        // 绑定拖动事件
+        aiFloat.addEventListener('mousedown', startDrag);
+        aiFloat.addEventListener('touchstart', startDrag, { passive: false });
+
+        // 阻止AI对话框内的点击事件冒泡，防止关闭对话框
+        aiChat.addEventListener('mousedown', (e) => e.stopPropagation());
+        aiChat.addEventListener('touchstart', (e) => e.stopPropagation());
+        // 让输入框可以获得焦点
+        aiChat.addEventListener('click', (e) => e.stopPropagation());
+
+        /**
+         * 开始拖动
+         * @param {Event} e - 鼠标或触摸事件
+         */
+        function startDrag(e) {
+            isDragging = true;
+            hasMoved = false;
+            aiFloat.classList.add('dragging');
+            
+            // 获取触摸或鼠标位置
+            const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+            const rect = aiFloat.getBoundingClientRect();
+            
+            // 计算偏移量
+            dragOffsetX = clientX - rect.left;
+            dragOffsetY = clientY - rect.top;
+            
+            if (e.type === 'touchstart') {
+                e.preventDefault();
+            }
+        }
+
+        // 绑定移动事件
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('touchmove', drag, { passive: false });
+
+        /**
+         * 拖动中
+         * @param {Event} e - 鼠标或触摸事件
+         */
+        function drag(e) {
+            if (!isDragging) return;
+            
+            // 获取触摸或鼠标位置
+            const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+            const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+            
+            // 计算新位置
+            const newX = clientX - dragOffsetX;
+            const newY = clientY - dragOffsetY;
+            
+            // 检测是否发生了移动
+            if (Math.abs(newX - parseFloat(aiFloat.style.left || 0)) > 5 || 
+                Math.abs(newY - parseFloat(aiFloat.style.top || 0)) > 5) {
+                hasMoved = true;
+                // 移动时关闭聊天窗口
+                if (aiChat.classList.contains('show')) {
+                    aiChat.classList.remove('show');
+                }
+            }
+            
+            // 更新位置
+            aiFloat.style.right = 'auto';
+            aiFloat.style.left = newX + 'px';
+            aiFloat.style.top = newY + 'px';
+            
+            if (e.type === 'touchmove') {
+                e.preventDefault();
+            }
+        }
+
+        // 绑定结束拖动事件
+        document.addEventListener('mouseup', endDrag);
+        document.addEventListener('touchend', endDrag);
+
+        /**
+         * 结束拖动
+         */
+        function endDrag() {
+            if (isDragging) {
+                isDragging = false;
+                aiFloat.classList.remove('dragging');
+                
+                // 如果没有移动，则切换聊天窗口
+                if (!hasMoved) {
+                    toggleChat();
+                }
+            }
+        }
+
+        /**
+         * 切换聊天窗口显示状态
+         */
+        function toggleChat() {
+            const isShowing = aiChat.classList.toggle('show');
+            if (isShowing) {
+                updateChatPosition();
+            }
+        }
+
+        /**
+         * 更新聊天窗口位置
+         * 根据悬浮球位置自动调整，确保完全可见
+         */
+        function updateChatPosition() {
+            const floatRect = aiFloat.getBoundingClientRect();
+            const chatWidth = 320;
+            const chatHeight = 450;
+            const margin = 15;
+            
+            let left, top;
+            
+            // 水平位置：悬浮球在右侧时窗口显示在左边，反之亦然
+            if (floatRect.left > window.innerWidth / 2) {
+                left = floatRect.left - chatWidth - margin;
+            } else {
+                left = floatRect.right + margin;
+            }
+            
+            // 边界检测：确保窗口不超出屏幕
+            if (left < 0) {
+                left = margin;
+            } else if (left + chatWidth > window.innerWidth) {
+                left = window.innerWidth - chatWidth - margin;
+            }
+            
+            // 垂直位置：居中对齐
+            top = floatRect.top + (floatRect.height / 2) - (chatHeight / 2);
+            
+            // 边界检测：确保窗口不超出屏幕
+            if (top < margin) {
+                top = margin;
+            } else if (top + chatHeight > window.innerHeight) {
+                top = window.innerHeight - chatHeight - margin;
+            }
+            
+            // 应用位置
+            aiChat.style.left = left + 'px';
+            aiChat.style.top = top + 'px';
+        }
+
+        // 当前显示的鱼类对话框
+        let currentFishDialog = null;
+
+        // 点击页面其他地方关闭鱼类对话框
+        document.addEventListener('click', () => {
+            if (currentFishDialog) {
+                currentFishDialog.remove();
+                currentFishDialog = null;
+            }
+        });
+
+        // 页面加载完成后初始化海洋生物
+        initFish();
+        
+        // 启动海洋生物移动动画循环（独立于滚动动画）
+        function fishAnimationLoop() {
+            // 只有在不滚动时才更新自身移动
+            if (!isScrolling) {
+                updateFishPosition();
+            }
+            requestAnimationFrame(fishAnimationLoop);
+        }
+        fishAnimationLoop();
+
+        /* ==================== 聊天功能 ==================== */
+        // 聊天记录数组（用于上下文对话）
+        let chatHistory = [];
+        
+        // 发送按钮点击事件
+        sendBtn.addEventListener('click', sendMessage);
+        // 输入框回车发送
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+
+        /**
+         * 发送消息 + 调用本地Ollama AI（支持聊天记录）
+         */
+        async function sendMessage() {
+            const text = chatInput.value.trim();
+            if (!text) return;
+            
+            // 用户消息
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message';
+            userMsg.style.marginLeft = 'auto';
+            userMsg.style.background = '#d1e7ff';
+            userMsg.textContent = text;
+            chatContent.appendChild(userMsg);
+            chatInput.value = '';
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            // AI 回复中...
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'message';
+            loadingMsg.textContent = '思考中...🐳';
+            chatContent.appendChild(loadingMsg);
+            chatContent.scrollTop = chatContent.scrollHeight;
+
+            try {
+                // 将用户消息添加到历史记录
+                chatHistory.push({ role: "user", content: text });
+                
+                // 限制聊天记录长度（只保留最近 10 条，避免 token 过多）
+                if (chatHistory.length > 10) {
+                    chatHistory = chatHistory.slice(-10);
+                }
+
+                const res = await fetch('http://localhost:11434/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        model: "qwen2.5:7b",
+                        messages: [
+                            {
+                                role: "system",
+                                content: "你是儿童海洋生物科普专家'海洋小博士'。请用以下方式和小朋友交流：1. 语言风格：简单可爱、通俗易懂、生动有趣，使用拟人化表达；2. 内容特点：用'你好呀''嗨'等亲切问候，多用感叹号和表情符号（🐬🐠🌊）介绍有趣的习性和特点，避免枯燥数据；3. 安全原则：不提及危险、血腥、死亡等内容，强调保护海洋、爱护生物，传递积极向上的价值观；4. 科普使命：激发儿童对海洋的兴趣，培养环保意识和生态观念，用故事化方式传递知识。5、小朋友和你说生物名是要你解释，不是让你扮演这个生物和他对话 6、回答长度：每次 4-5 句话，简短精炼，适合儿童注意力；7、强调动物的危险性，不要误导小朋友踏入危险，"
+                            },
+                            ...chatHistory  // 包含聊天记录
+                        ],
+                        stream: false
+                    })
+                });
+
+                const data = await res.json();
+                const aiText = data.message.content;
+
+                // 将 AI 回复添加到历史记录
+                chatHistory.push({ role: "assistant", content: aiText });
+
+                // 移除加载中，显示 AI 回答
+                loadingMsg.remove();
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message';
+                aiMsg.textContent = aiText;
+                chatContent.appendChild(aiMsg);
+                chatContent.scrollTop = chatContent.scrollHeight;
+
+            } catch (err) {
+                loadingMsg.remove();
+                const errMsg = document.createElement('div');
+                errMsg.className = 'message';
+                errMsg.textContent = '连接 AI 失败，请确保 Ollama 已启动';
+                chatContent.appendChild(errMsg);
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }
+        }
+    </script>
+</body>
+</html>
