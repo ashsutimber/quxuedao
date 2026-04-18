@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>趣学岛——儿童社区</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", 微软雅黑, sans-serif;
+        }
+
+        /* 背景容器样式 */
+        .container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 视频背景样式 */
+        .background-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+        
+        /* 背景遮罩样式 */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
+        }
+
+        /* 标题样式 */
+        .title {
+            font-size: 48px;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+            margin-bottom: 80px;
+            letter-spacing: 5px;
+            font-weight: bold;
+        }
+
+        /* 按钮容器样式 - 绝对定位到底部，对齐木质按钮 */
+        .btn-group {
+            position: absolute;
+            bottom: 15%; /* 适当上移 */
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5vw; /* 使用视窗单位，按页面比例 */
+            flex-wrap: nowrap;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* 按钮基础样式 - 使用图片背景 */
+        .custom-btn {
+            width: 20vw; /* 使用视窗单位，按页面比例 */
+            height: 6.5vw; /* 使用视窗单位，按页面比例 */
+            font-size: 1.5vw;
+            color: transparent; /* 文字透明，因为图片上已有文字 */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: none;
+            border-radius: 0.8vw;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.1vw;
+            font-weight: 500;
+            position: relative;
+        }
+
+        /* 魔法森林按钮背景 */
+        #btn-forest {
+            background-image: url('./picture/Magic Forest.jpg');
+        }
+
+        /* 文化馆按钮背景 */
+        #btn-culture {
+            background-image: url('./picture/Cultural Relic Museum.jpg');
+        }
+
+        /* 港口按钮背景 */
+        #btn-port {
+            background-image: url('./picture/Port.jpg');
+        }
+
+        /* 按钮 hover 效果 - 轻微缩放提示可点击 */
+        .custom-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 按钮点击效果 */
+        .custom-btn:active {
+            transform: scale(0.95);
+        }
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 视频背景 -->
+        <video class="background-video" autoplay muted playsinline id="backgroundVideo">
+            <source src="./video/map_start.mp4" type="video/mp4">
+            您的浏览器不支持视频播放。
+        </video>
+        <!-- 背景遮罩 -->
+        <div class="background-overlay"></div>
+        <!-- 标题（初始隐藏） -->
+        <h1 class="title" style="display: none;">趣学岛——儿童社区</h1>
+        <!-- 按钮组（初始隐藏） -->
+        <div class="btn-group" style="display: none;">
+            <button class="custom-btn" id="btn-forest">魔法森林公园</button>
+            <button class="custom-btn" id="btn-culture">文化馆</button>
+            <button class="custom-btn" id="btn-port">港口</button>
+        </div>
+    </div>
+    <script>
+        // 为按钮添加点击事件（可根据需求扩展功能）
+        const btnForest = document.getElementById('btn-forest');
+        const btnCulture = document.getElementById('btn-culture');
+        const btnPort = document.getElementById('btn-port');
+
+        btnForest.addEventListener('click', function() {
+            window.location.href = './forest/html/index.html';
+        });
+
+        btnCulture.addEventListener('click', function() {
+            window.location.href = './culture/index.html';
+        });
+
+        btnPort.addEventListener('click', function() {
+            // 设置音乐播放标记到 localStorage
+            localStorage.setItem('harborMusic', 'true');
+            window.location.href = './harbor/harbor.html';
+        });
+
+        // 获取视频、标题和按钮元素
+        const video = document.getElementById('backgroundVideo');
+        const title = document.querySelector('.title');
+        const btnGroup = document.querySelector('.btn-group');
+
+        // 显示标题和按钮的函数
+        function showTitleAndButtons() {
+            // 停止视频播放
+            video.pause();
+            
+            // 显示标题，添加淡入动画
+            title.style.display = 'block';
+            title.style.opacity = '0';
+            title.style.transition = 'opacity 1s ease';
+            
+            // 显示按钮组，添加淡入动画
+            btnGroup.style.display = 'flex';
+            btnGroup.style.opacity = '0';
+            btnGroup.style.transition = 'opacity 1s ease';
+            
+            // 延迟显示，确保动画效果
+            setTimeout(() => {
+                title.style.opacity = '1';
+                setTimeout(() => {
+                    btnGroup.style.opacity = '1';
+                }, 500);
+            }, 300);
+        }
+
+        // 视频播放完成事件
+        video.addEventListener('ended', showTitleAndButtons);
+
+        // 点击页面跳转到视频最后
+        document.addEventListener('click', function(e) {
+            // 确保视频已加载并获取到时长
+            if (video && video.duration > 0) {
+                // 跳转到视频最后（最后0.1秒）
+                video.currentTime = video.duration - 0.1;
+            } else if (video) {
+                // 如果视频还未加载完成，等待加载完成后再跳转
+                video.addEventListener('loadedmetadata', function() {
+                    if (video.duration > 0) {
+                        video.currentTime = video.duration - 0.1;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
